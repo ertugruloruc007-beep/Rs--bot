@@ -1,0 +1,22 @@
+name: Backtest
+on:
+  workflow_dispatch:
+    inputs:
+      risk:
+        description: "Islem basina risk yuzdesi (1 veya 2)"
+        default: "1"
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests pandas numpy
+      - run: python backtest.py
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RISK_PCT: ${{ github.event.inputs.risk }}
