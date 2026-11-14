@@ -9,7 +9,17 @@ BASE = "https://data-api.binance.vision/api/v3"
 RSI_LOW = 25
 RSI_HIGH = 75
 TOP_N = 300
+MIN_VOL_24H = 5_000_000      # 24s hacmi bunun altindaki coinler taranmaz
 STABLES = {"USDC", "FDUSD", "TUSD", "USDP", "DAI", "EUR", "TRY", "BUSD"}
+
+# ---- ISLEM PLANI AYARLARI ----
+ACCOUNT_USDT = 1000          # <-- Binance Futures hesabindaki toplam bakiyen (USDT). Burayi guncelle!
+RISK_PCT = 2                 # islem basina risk yuzdesi
+LEVERAGE = 10
+ATR_MULT = 2.0               # stop mesafesi = 2 x ATR (15dk)
+MAX_MARGIN_PCT = 30          # tek islemde hesabin en fazla %30'u marjin olsun
+MAX_STOP_PCT = 8             # stop bundan uzaksa "atla" uyarisi
+FEE = 0.0005                 # taker komisyonu (tek yon)
 
 
 def rsi(closes, period=14):
@@ -29,6 +39,26 @@ def rsi(closes, period=14):
     return out
 
 
+def atr(highs, lows, closes, period=14):
+    trs = []
+    for i in range(1, len(closes)):
+        trs.append(max(highs[i] - lows[i],
+                       abs(highs[i] - closes[i - 1]),
+                       abs(lows[i] - closes[i - 1])))
+    a = sum(trs[:period]) / period
+    for tr in trs[period:]:
+        a = (a * (period - 1) + tr) / period
+    return a
+
+
+def ema(values, span):
+    k = 2 / (span + 1)
+    e = values[0]
+    for v in values[1:]:
+        e = v * k + e * (1 - k)
+    return e
+
+
 def send(text):
     requests.post(
         f"https://api.telegram.org/bot{TOKEN}/sendMessage",
@@ -37,12 +67,27 @@ def send(text):
     )
 
 
+def send_chunks(blocks):
+    cur = ""
+    for b in blocks:
+        if len(cur) + len(b) + 2 > 3600 and cur:
+            send(cur)
+            cur = ""
+        cur += ("\n\n" if cur else "") + b
+    if cur:
+        send(cur)
+
+
 def fmt_usd(x):
     if x >= 1e9:
         return f"{x / 1e9:.2f}B$"
     if x >= 1e6:
         return f"{x / 1e6:.1f}M$"
     return f"{x / 1e3:.0f}K$"
+
+
+def fp(x):
+    return f"{x:.6g}"
 
 
 def hourly_rsi(symbol):
@@ -58,17 +103,84 @@ def hourly_rsi(symbol):
         return "?"
 
 
+def trend_4h(symbol):
+    """1: yukari, -1: asagi, 0: yatay, None: bilinmiyor"""
+    try:
+        k = requests.get(
+            BASE + "/klines",
+            params={"symbol": symbol, "interval": "4h", "limit": 300},
+            timeout=20,
+        ).json()
+        closes = [float(c[4]) for c in k[:-1]]
+        if len(closes) < 210:
+            return None
+        e50, e200 = ema(closes, 50), ema(closes, 200)
+        if e50 > e200 and closes[-1] > e200:
+            return 1
+        if e50 < e200 and closes[-1] < e200:
+            return -1
+        return 0
+    except Exception:
+        return None
+
+
+def plan_text(sym, d, closes, highs, lows, rsi_val, h_rsi, trend, qvol, ratio):
+    entry = closes[-1]
+    dist = ATR_MULT * atr(highs, lows, closes)
+    stop = entry - d * dist
+    stop_pct = dist / entry * 100
+    tp1 = entry + d * dist
+    tp2 = entry + d * 2 * dist
+    side = "LONG" if d == 1 else "SHORT"
+
+    risk_amt = ACCOUNT_USDT * RISK_PCT / 100
+    notional = risk_amt / dist * entry
+    cap = ACCOUNT_USDT * LEVERAGE * MAX_MARGIN_PCT / 100
+    risk_real = risk_amt
+    if notional > cap:
+        notional = cap
+        risk_real = notional / entry * dist
+    margin = notional / LEVERAGE
+    fee = notional * FEE * 2
+
+    tname = {1: "YUKARI", -1: "ASAGI", 0: "YATAY", None: "?"}[trend]
+    if trend == d:
+        verdict = "trend yonunde"
+    elif trend == -d:
+        verdict = "TREND TERSINE, riskli"
+    else:
+        verdict = "trend belirsiz"
+
+    lines = [
+        f"{sym[:-4]}/USDT - {side} plani",
+        f"RSI {rsi_val:.1f} (15dk) | {h_rsi} (1s) | 4s trend: {tname} -> {verdict}",
+        f"Giris ~{fp(entry)}",
+        f"Stop {fp(stop)} (%{stop_pct:.1f})",
+        f"Hedef1 {fp(tp1)} (yarisini kapat, stopu girise cek)",
+        f"Hedef2 {fp(tp2)} (kalan yari)",
+        f"Risk {risk_real:.0f}$ | Pozisyon {notional:.0f}$ | Marjin ({LEVERAGE}x) {margin:.0f}$",
+        f"Komisyon ~{fee:.1f}$ | 24s hacim {fmt_usd(qvol)} | Hacim {ratio:.1f}x",
+    ]
+    if risk_real < risk_amt * 0.999:
+        lines.append(f"Uyari: Marjin sinirina takildi, risk %{risk_real / ACCOUNT_USDT * 100:.1f}'e dustu.")
+    if stop_pct > MAX_STOP_PCT:
+        lines.append("Uyari: Stop cok uzak, 10x icin uygun degil. ATLA.")
+    if risk_real > 0 and fee / risk_real > 0.25:
+        lines.append("Uyari: Komisyon riskin buyuk kismi, dar stopta kar ederek cikmak zor.")
+    return "\n".join(lines)
+
+
 def main():
     tickers = requests.get(BASE + "/ticker/24hr", timeout=30).json()
     pairs = [
         t for t in tickers
         if t["symbol"].endswith("USDT") and t["symbol"][:-4] not in STABLES
+        and float(t["quoteVolume"]) >= MIN_VOL_24H
     ]
     pairs.sort(key=lambda t: float(t["quoteVolume"]), reverse=True)
     top = pairs[:TOP_N]
 
-    low_hits = []
-    high_hits = []
+    hits = []
     for t in top:
         s = t["symbol"]
         try:
@@ -77,8 +189,10 @@ def main():
                 params={"symbol": s, "interval": "15m", "limit": 100},
                 timeout=20,
             ).json()
-            k = k[:-1]  # son (açık) mumu atla
+            k = k[:-1]  # son (acik) mumu atla
             closes = [float(c[4]) for c in k]
+            highs = [float(c[2]) for c in k]
+            lows = [float(c[3]) for c in k]
             vols = [float(c[7]) for c in k]
             r = rsi(closes)
 
@@ -87,32 +201,29 @@ def main():
             if not (is_low or is_high):
                 continue
 
+            d = 1 if is_low else -1
             avg_vol = sum(vols[-21:-1]) / 20
             ratio = vols[-1] / avg_vol if avg_vol > 0 else 0
-            line = (
-                f"{s[:-4]}/USDT\n"
-                f"RSI: {r[-1]:.1f} | Fiyat: {closes[-1]}\n"
-                f"24s değişim: {float(t['priceChangePercent']):+.1f}% | "
-                f"24s hacim: {fmt_usd(float(t['quoteVolume']))}\n"
-                f"Hacim: {ratio:.1f}x | 1s RSI: {hourly_rsi(s)}"
-            )
-            if is_low:
-                low_hits.append(line)
-            else:
-                high_hits.append(line)
+            trend = trend_4h(s)
+            text = plan_text(s, d, closes, highs, lows, r[-1], hourly_rsi(s),
+                             trend, float(t["quoteVolume"]), ratio)
+            aligned = 1 if trend == d else 0
+            hits.append((aligned, ratio, text))
         except Exception as e:
             print(s, "hata:", e)
 
-    parts = []
-    if low_hits:
-        parts.append("RSI 25 altına düştü (15dk):\n\n" + "\n\n".join(low_hits))
-    if high_hits:
-        parts.append("RSI 75 üstüne çıktı (15dk):\n\n" + "\n\n".join(high_hits))
-
-    if parts:
-        send("\n\n-----\n\n".join(parts))
+    if hits:
+        hits.sort(key=lambda x: (x[0], x[1]), reverse=True)
+        head = (f"RSI SINYALI - ISLEM PLANLARI (15dk, risk %{RISK_PCT} = "
+                f"{ACCOUNT_USDT * RISK_PCT / 100:.0f}$, {LEVERAGE}x)\n"
+                f"Trend yonundekiler once listelenir.")
+        foot = ("Bu bir yatirim tavsiyesi degil, hesap araci. RSI tek basina kar "
+                "kaniti degil. Girer girmez Stop Market emrini borsaya gir, "
+                "ilk islemlerde kucuk basla.")
+        send_chunks([head] + [h[2] for h in hits] + [foot])
     elif MANUAL:
-        send(f"Test başarılı. {len(top)} coin tarandı, şu an sinyal yok.")
+        send(f"Test basarili. {len(top)} coin tarandi, su an sinyal yok.")
 
 
-main()
+if __name__ == "__main__":
+    main()
