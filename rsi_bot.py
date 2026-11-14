@@ -6,8 +6,9 @@ CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
 MANUAL = os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch"
 
 BASE = "https://data-api.binance.vision/api/v3"
-RSI_LEVEL = 30
-TOP_N = 100
+RSI_LOW = 30
+RSI_HIGH = 70
+TOP_N = 300
 STABLES = {"USDC", "FDUSD", "TUSD", "USDP", "DAI", "EUR", "TRY", "BUSD"}
 
 
@@ -45,7 +46,8 @@ def main():
     pairs.sort(key=lambda t: float(t["quoteVolume"]), reverse=True)
     symbols = [t["symbol"] for t in pairs[:TOP_N]]
 
-    hits = []
+    low_hits = []
+    high_hits = []
     for s in symbols:
         try:
             k = requests.get(
@@ -55,13 +57,22 @@ def main():
             ).json()
             closes = [float(c[4]) for c in k[:-1]]  # son (açık) mumu atla
             r = rsi(closes)
-            if r[-1] < RSI_LEVEL and r[-2] >= RSI_LEVEL:
-                hits.append(f"{s[:-4]}/USDT  RSI: {r[-1]:.1f}  Fiyat: {closes[-1]}")
+            line = f"{s[:-4]}/USDT  RSI: {r[-1]:.1f}  Fiyat: {closes[-1]}"
+            if r[-1] < RSI_LOW and r[-2] >= RSI_LOW:
+                low_hits.append(line)
+            if r[-1] > RSI_HIGH and r[-2] <= RSI_HIGH:
+                high_hits.append(line)
         except Exception as e:
             print(s, "hata:", e)
 
-    if hits:
-        send("RSI 30 altına düştü (15dk):\n\n" + "\n".join(hits))
+    parts = []
+    if low_hits:
+        parts.append("RSI 30 altına düştü (15dk):\n" + "\n".join(low_hits))
+    if high_hits:
+        parts.append("RSI 70 üstüne çıktı (15dk):\n" + "\n".join(high_hits))
+
+    if parts:
+        send("\n\n".join(parts))
     elif MANUAL:
         send(f"Test başarılı. {len(symbols)} coin tarandı, şu an sinyal yok.")
 
