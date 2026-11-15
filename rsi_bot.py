@@ -11,7 +11,7 @@ MIN_VOL_24H = 5_000_000
 STABLES = {"USDC", "FDUSD", "TUSD", "USDP", "DAI", "EUR", "TRY", "BUSD"}
 
 # ---- ONERI AYARLARI ----
-MIN_SCORE = 4                # 5 uzerinden en az bu skoru alan coinler onerilir
+MIN_SCORE = 3                # 5 uzerinden en az bu skoru alan coinler onerilir
 MAX_RECS = 5                 # en fazla kac coin onerilsin
 VOL_SPIKE = 1.5              # hacim, son 20 mum ortalamasinin en az bu kati olmali
 
