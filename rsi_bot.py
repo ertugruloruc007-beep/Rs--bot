@@ -1,4 +1,8 @@
+import json
 import os
+import time
+from datetime import datetime, timedelta, timezone
+
 import requests
 
 TOKEN = os.environ["TELEGRAM_TOKEN"]
@@ -22,6 +26,11 @@ LEVERAGE = 10
 ATR_MULT = 2.0
 MAX_MARGIN_PCT = 30
 MAX_STOP_PCT = 8
+
+# ---- TAKIP NOTU AYARLARI ----
+STATE_FILE = "signals.json"
+TZ_NAME = "Europe/Istanbul"  # saatler bu saat diliminde yazilir
+FOLLOW_UP_HOURS = (1, 2)     # kac saat sonra sonuc notu gonderilsin
 
 
 def rsi_series(closes, period=14):
@@ -142,12 +151,8 @@ def eval_dir(d, i, closes, vols, rs, e9, e21, e50):
     return pts, ratio
 
 
-def plan_lines(d, entry, highs, lows, closes):
+def plan_levels(d, entry, highs, lows, closes):
     dist = ATR_MULT * atr(highs, lows, closes)
-    stop = entry - d * dist
-    stop_pct = dist / entry * 100
-    tp1 = entry + d * dist
-    tp2 = entry + d * 2 * dist
     risk_amt = ACCOUNT_USDT * RISK_PCT / 100
     notional = risk_amt / dist * entry
     cap = ACCOUNT_USDT * LEVERAGE * MAX_MARGIN_PCT / 100
@@ -155,18 +160,147 @@ def plan_lines(d, entry, highs, lows, closes):
     if notional > cap:
         notional = cap
         risk_real = notional / entry * dist
-    margin = notional / LEVERAGE
+    return {
+        "stop": entry - d * dist,
+        "tp1": entry + d * dist,
+        "tp2": entry + d * 2 * dist,
+        "stop_pct": dist / entry * 100,
+        "risk": risk_real,
+        "notional": notional,
+        "margin": notional / LEVERAGE,
+    }
+
+
+def plan_lines(entry, lv):
     lines = [
-        f"Giris ~{fp(entry)} | Stop {fp(stop)} (%{stop_pct:.1f})",
-        f"Hedef1 {fp(tp1)} | Hedef2 {fp(tp2)}",
-        f"Risk {risk_real:.0f}$ | Pozisyon {notional:.0f}$ | Marjin {margin:.0f}$",
+        f"Giris ~{fp(entry)} | Stop {fp(lv['stop'])} (%{lv['stop_pct']:.1f})",
+        f"Hedef1 {fp(lv['tp1'])} | Hedef2 {fp(lv['tp2'])}",
+        f"Risk {lv['risk']:.0f}$ | Pozisyon {lv['notional']:.0f}$ | Marjin {lv['margin']:.0f}$",
     ]
-    if stop_pct > MAX_STOP_PCT:
+    if lv["stop_pct"] > MAX_STOP_PCT:
         lines.append("Uyari: Stop cok uzak, ATLA.")
     return lines
 
 
+def load_state():
+    try:
+        with open(STATE_FILE) as f:
+            st = json.load(f)
+    except Exception:
+        st = {}
+    st.setdefault("signals", [])
+    st.setdefault("stats", {})
+    for h in FOLLOW_UP_HOURS:
+        st["stats"].setdefault(str(h), {"n": 0, "win": 0, "sum": 0.0})
+    return st
+
+
+def save_state(st):
+    with open(STATE_FILE, "w") as f:
+        json.dump(st, f, indent=1)
+
+
+def hhmm(ms):
+    try:
+        from zoneinfo import ZoneInfo
+        tz = ZoneInfo(TZ_NAME)
+    except Exception:
+        tz = timezone(timedelta(hours=3))
+    return datetime.fromtimestamp(ms / 1000, tz).strftime("%H:%M")
+
+
+def follow_up(state, now_ms):
+    """Suresi dolan onerilerin sonucunu hesaplar, mesaj bloklari dondurur."""
+    items = {h: [] for h in FOLLOW_UP_HOURS}
+    pnls = {h: [] for h in FOLLOW_UP_HOURS}
+    for sig in state["signals"]:
+        for h in FOLLOW_UP_HOURS:
+            key = str(h)
+            if key in sig["done"]:
+                continue
+            n_c = 4 * h
+            end_ms = sig["t0"] + h * 3600 * 1000
+            if now_ms < end_ms + 5000:
+                continue
+            if now_ms > end_ms + 6 * 3600 * 1000:   # cok gec kalmis, vazgec
+                sig["done"].append(key)
+                continue
+            try:
+                k = requests.get(
+                    BASE + "/klines",
+                    params={"symbol": sig["sym"], "interval": "15m",
+                            "startTime": sig["t0"], "limit": n_c},
+                    timeout=20,
+                ).json()
+                k = [c for c in k if c[6] < now_ms]   # sadece kapanmis mumlar
+                if len(k) < n_c:
+                    continue
+                d, entry = sig["d"], sig["entry"]
+                final = float(k[-1][4])
+                hi = max(float(c[2]) for c in k)
+                lo = min(float(c[3]) for c in k)
+                price_chg = (final / entry - 1) * 100
+                if d == 1:
+                    pnl = price_chg
+                    best = (hi / entry - 1) * 100
+                    worst = (lo / entry - 1) * 100
+                    stop_hit = lo <= sig["stop"]
+                    t1 = hi >= sig["tp1"]
+                    t2 = hi >= sig["tp2"]
+                else:
+                    pnl = -price_chg
+                    best = (1 - lo / entry) * 100
+                    worst = (1 - hi / entry) * 100
+                    stop_hit = hi >= sig["stop"]
+                    t1 = lo <= sig["tp1"]
+                    t2 = lo <= sig["tp2"]
+                side = "LONG" if d == 1 else "SHORT"
+                text = (
+                    f"{sig['sym'][:-4]}/USDT {side} ({hhmm(sig['t0'])} onerisi)\n"
+                    f"{fp(entry)} -> {fp(final)} (fiyat %{price_chg:+.2f})\n"
+                    f"Islem: %{pnl:+.2f} {'kazanc' if pnl > 0 else 'zarar'} "
+                    f"| {LEVERAGE}x ile ~%{pnl * LEVERAGE:+.1f}\n"
+                    f"Aralik: en iyi %{best:+.1f}, en kotu %{worst:+.1f}\n"
+                    f"Stop {'DEGDI' if stop_hit else 'degmedi'} | "
+                    f"Hedef1 {'degdi' if t1 else 'degmedi'} | "
+                    f"Hedef2 {'degdi' if t2 else 'degmedi'}"
+                )
+                items[h].append(text)
+                pnls[h].append(pnl)
+                st = state["stats"][key]
+                st["n"] += 1
+                st["win"] += 1 if pnl > 0 else 0
+                st["sum"] += pnl
+                sig["done"].append(key)
+            except Exception as e:
+                print(sig["sym"], "takip hatasi:", e)
+
+    blocks = []
+    for h in FOLLOW_UP_HOURS:
+        if not items[h]:
+            continue
+        p = pnls[h]
+        wins = sum(1 for x in p if x > 0)
+        st = state["stats"][str(h)]
+        blocks.append(f"{h} SAAT SONRA - ONERI TAKIP NOTLARI")
+        blocks += items[h]
+        blocks.append(
+            f"Bu grup: {len(p)} oneri, {wins} tanesi yonunde, ort %{sum(p) / len(p):+.2f}\n"
+            f"Genel ({h}s): {st['n']} oneri, %{st['win'] / st['n'] * 100:.0f} yonunde, "
+            f"ort %{st['sum'] / st['n']:+.2f}")
+    if blocks:
+        blocks.append("Fiyatlar 15dk mum kapanislaridir; komisyon ve kayma dahil degil.")
+    return blocks
+
+
 def main():
+    state = load_state()
+    now_ms = int(time.time() * 1000)
+    fu_blocks = follow_up(state, now_ms)
+    state["signals"] = [s for s in state["signals"]
+                        if len(s["done"]) < len(FOLLOW_UP_HOURS)]
+    save_state(state)
+
     tickers = requests.get(BASE + "/ticker/24hr", timeout=30).json()
     pairs = [
         t for t in tickers
@@ -223,11 +357,16 @@ def main():
             head = f"{s[:-4]}/USDT  {side}  Skor {total}/5"
             body = [f"{' + '.join(reasons)}",
                     f"RSI {rs[i]:.0f} ({arrow}) | Hacim {ratio:.1f}x | 24s {float(t['priceChangePercent']):+.1f}%"]
-            body += plan_lines(d, closes[i], highs, lows, closes)
-            recs.append((total, ratio, head + "\n" + "\n".join(body)))
+            lv = plan_levels(d, closes[i], highs, lows, closes)
+            body += plan_lines(closes[i], lv)
+            sig = {"sym": s, "d": d, "entry": closes[i], "stop": lv["stop"],
+                   "tp1": lv["tp1"], "tp2": lv["tp2"], "t0": int(k[-1][6]) + 1,
+                   "done": []}
+            recs.append((total, ratio, head + "\n" + "\n".join(body), sig))
         except Exception as e:
             print(s, "hata:", e)
 
+    outgoing = []
     if recs:
         recs.sort(key=lambda x: (x[0], x[1]), reverse=True)
         btc = htf_trend("BTCUSDT")
@@ -236,16 +375,20 @@ def main():
         head = (f"15DK TARAMA - ONERILEN COINLER\n"
                 f"BTC 1s trend: {btc_txt} | {len(recs)} oneri, en iyi {len(shown)}\n"
                 f"Risk %{RISK_PCT} = {ACCOUNT_USDT * RISK_PCT / 100:.0f}$, {LEVERAGE}x")
-        blocks = [head]
-        blocks += [f"{n}) {r[2]}" for n, r in enumerate(shown, 1)]
-        blocks.append(
+        outgoing.append(head)
+        outgoing += [f"{n}) {r[2]}" for n, r in enumerate(shown, 1)]
+        outgoing.append(
             "Skor = teknik uyum sayisidir (EMA trend, EMA kesisim, RSI, hacim, 1s trend), "
             "kazanma olasiligi degil. Hedef1'de yarisini kapat, stopu girise cek. "
             "Girer girmez Stop Market emri gir. Ayni yonde en fazla 1-2 islem ac. "
             "Yatirim tavsiyesi degildir.")
-        send_chunks(blocks)
-    elif MANUAL:
-        send(f"Test basarili. {len(top)} coin tarandi, su an oneri yok.")
+        state["signals"] += [r[3] for r in shown]
+    outgoing += fu_blocks
+    if not recs and MANUAL:
+        outgoing.insert(0, f"Test basarili. {len(top)} coin tarandi, su an yeni oneri yok.")
+    if outgoing:
+        send_chunks(outgoing)
+    save_state(state)
 
 
 if __name__ == "__main__":
