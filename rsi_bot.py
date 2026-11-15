@@ -20,6 +20,8 @@ ATR_MULT = 2.0               # stop mesafesi = 2 x ATR (15dk)
 MAX_MARGIN_PCT = 30          # tek islemde hesabin en fazla %30'u marjin olsun
 MAX_STOP_PCT = 8             # stop bundan uzaksa "atla" uyarisi
 FEE = 0.0005                 # taker komisyonu (tek yon)
+MAX_PLANS = 3                # detayli plan yazilacak en guclu sinyal sayisi
+MARKET_WARN_COUNT = 5        # bu kadar coinde ayni anda ayni yonde sinyal = piyasa uyarisi
 
 
 def rsi(closes, period=14):
@@ -124,14 +126,27 @@ def trend_4h(symbol):
         return None
 
 
-def plan_text(sym, d, closes, highs, lows, rsi_val, h_rsi, trend, qvol, ratio):
-    entry = closes[-1]
-    dist = ATR_MULT * atr(highs, lows, closes)
+def side_block(entry, dist, d, trend):
     stop = entry - d * dist
-    stop_pct = dist / entry * 100
     tp1 = entry + d * dist
     tp2 = entry + d * 2 * dist
     side = "LONG" if d == 1 else "SHORT"
+    if trend == d:
+        tag = "trend yonunde"
+    elif trend == -d:
+        tag = "trend tersi, riskli"
+    else:
+        tag = "trend belirsiz"
+    return (f"{side} ({tag})\n"
+            f"Giris ~{fp(entry)} | Stop {fp(stop)}\n"
+            f"Hedef1 {fp(tp1)} | Hedef2 {fp(tp2)}")
+
+
+def plan_text(sym, d, closes, highs, lows, rsi_val, h_rsi, trend, qvol, ratio):
+    """d: RSI yonu (1 = dipte, -1 = tepede). Iki yonlu plan uretir."""
+    entry = closes[-1]
+    dist = ATR_MULT * atr(highs, lows, closes)
+    stop_pct = dist / entry * 100
 
     risk_amt = ACCOUNT_USDT * RISK_PCT / 100
     notional = risk_amt / dist * entry
@@ -144,29 +159,25 @@ def plan_text(sym, d, closes, highs, lows, rsi_val, h_rsi, trend, qvol, ratio):
     fee = notional * FEE * 2
 
     tname = {1: "YUKARI", -1: "ASAGI", 0: "YATAY", None: "?"}[trend]
-    if trend == d:
-        verdict = "trend yonunde"
-    elif trend == -d:
-        verdict = "TREND TERSINE, riskli"
-    else:
-        verdict = "trend belirsiz"
+    # trend yonundeki plan once yazilir
+    order = [d, -d] if trend != -d else [-d, d]
 
     lines = [
-        f"{sym[:-4]}/USDT - {side} plani",
-        f"RSI {rsi_val:.1f} (15dk) | {h_rsi} (1s) | 4s trend: {tname} -> {verdict}",
-        f"Giris ~{fp(entry)}",
-        f"Stop {fp(stop)} (%{stop_pct:.1f})",
-        f"Hedef1 {fp(tp1)} (yarisini kapat, stopu girise cek)",
-        f"Hedef2 {fp(tp2)} (kalan yari)",
-        f"Risk {risk_real:.0f}$ | Pozisyon {notional:.0f}$ | Marjin ({LEVERAGE}x) {margin:.0f}$",
-        f"Komisyon ~{fee:.1f}$ | 24s hacim {fmt_usd(qvol)} | Hacim {ratio:.1f}x",
+        f"{sym[:-4]}/USDT | RSI {rsi_val:.1f} (15dk) {h_rsi} (1s) | 4s trend: {tname}",
+        f"Hacim {ratio:.1f}x | 24s hacim {fmt_usd(qvol)} | Stop mesafesi %{stop_pct:.1f}",
+        f"Risk {risk_real:.0f}$ | Pozisyon {notional:.0f}$ | Marjin ({LEVERAGE}x) {margin:.0f}$ | Komisyon ~{fee:.1f}$",
+        "(Boyut iki yon icin de aynidir)",
+        "",
+        side_block(entry, dist, order[0], trend),
+        "",
+        side_block(entry, dist, order[1], trend),
     ]
     if risk_real < risk_amt * 0.999:
         lines.append(f"Uyari: Marjin sinirina takildi, risk %{risk_real / ACCOUNT_USDT * 100:.1f}'e dustu.")
     if stop_pct > MAX_STOP_PCT:
         lines.append("Uyari: Stop cok uzak, 10x icin uygun degil. ATLA.")
     if risk_real > 0 and fee / risk_real > 0.25:
-        lines.append("Uyari: Komisyon riskin buyuk kismi, dar stopta kar ederek cikmak zor.")
+        lines.append("Uyari: Komisyon riskin buyuk kismi.")
     return "\n".join(lines)
 
 
@@ -208,19 +219,43 @@ def main():
             text = plan_text(s, d, closes, highs, lows, r[-1], hourly_rsi(s),
                              trend, float(t["quoteVolume"]), ratio)
             aligned = 1 if trend == d else 0
-            hits.append((aligned, ratio, text))
+            hits.append({"aligned": aligned, "ratio": ratio, "text": text,
+                         "d": d, "rsi": r[-1], "trend": trend, "sym": s})
         except Exception as e:
             print(s, "hata:", e)
 
     if hits:
-        hits.sort(key=lambda x: (x[0], x[1]), reverse=True)
+        hits.sort(key=lambda x: (x["aligned"], x["ratio"]), reverse=True)
+        lows_n = sum(1 for h in hits if h["d"] == 1)
+        highs_n = len(hits) - lows_n
+        risk_each = ACCOUNT_USDT * RISK_PCT / 100
+        shown = hits[:MAX_PLANS]
+
         head = (f"RSI SINYALI - ISLEM PLANLARI (15dk, risk %{RISK_PCT} = "
-                f"{ACCOUNT_USDT * RISK_PCT / 100:.0f}$, {LEVERAGE}x)\n"
-                f"Trend yonundekiler once listelenir.")
-        foot = ("Bu bir yatirim tavsiyesi degil, hesap araci. RSI tek basina kar "
-                "kaniti degil. Girer girmez Stop Market emrini borsaya gir, "
-                "ilk islemlerde kucuk basla.")
-        send_chunks([head] + [h[2] for h in hits] + [foot])
+                f"{risk_each:.0f}$, {LEVERAGE}x)\n"
+                f"{len(hits)} sinyal var, en guclu {len(shown)} tanesi detayli.")
+        blocks = [head]
+        if max(lows_n, highs_n) >= MARKET_WARN_COUNT:
+            kind = "DIBINE VURDU (sert dusus)" if lows_n >= highs_n else "TEPESINE CIKTI (sert yukselis)"
+            blocks.append(
+                f"PIYASA UYARISI: {max(lows_n, highs_n)} coinde ayni anda RSI {kind}. "
+                f"Coinler birlikte hareket eder. Ayni yonde en fazla 1-2 islem ac; "
+                f"{len(shown)} plana birden girersen risk birlesir "
+                f"({len(shown) * risk_each:.0f}$).")
+        blocks += [h["text"] for h in shown]
+        rest = hits[MAX_PLANS:]
+        if rest:
+            items = [f"{h['sym'][:-4]} {h['rsi']:.0f} {'dip' if h['d'] == 1 else 'tepe'}"
+                     for h in rest[:20]]
+            more = f" (+{len(rest) - 20} daha)" if len(rest) > 20 else ""
+            blocks.append("Diger sinyaller (detaysiz): " + ", ".join(items) + more)
+        blocks.append(
+            "Hedef1'de pozisyonun yarisini kapat ve stopu girise cek, Hedef2'de "
+            "kalani kapat. Girer girmez Stop Market emrini borsaya gir.\n"
+            "Not: Asiri RSI'da trend yonunde girmek dipte satmak / tepede almak "
+            "demektir, ani tepki stopa yakalar; tercihen tepkiden sonra girisi bekle. "
+            "Bu bir yatirim tavsiyesi degil, hesap araci. RSI tek basina kar kaniti degil.")
+        send_chunks(blocks)
     elif MANUAL:
         send(f"Test basarili. {len(top)} coin tarandi, su an sinyal yok.")
 
