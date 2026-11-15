@@ -12,7 +12,9 @@ MANUAL = os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch"
 BASE = "https://data-api.binance.vision/api/v3"
 TOP_N = 300
 MIN_VOL_24H = 5_000_000
-STABLES = {"USDC", "FDUSD", "TUSD", "USDP", "DAI", "EUR", "TRY", "BUSD"}
+STABLES = {"USDC", "FDUSD", "TUSD", "USDP", "DAI", "EUR", "TRY", "BUSD",
+           "BFUSD", "USD1", "USDE", "RLUSD", "XUSD", "USDS", "PYUSD", "AEUR",
+           "USDD", "EURI", "EURC", "FRAX", "UST"}
 
 # ---- ONERI AYARLARI ----
 MIN_SCORE = 3                # 5 uzerinden en az bu skoru alan coinler onerilir
@@ -25,7 +27,8 @@ RISK_PCT = 2
 LEVERAGE = 10
 ATR_MULT = 2.0
 MAX_MARGIN_PCT = 30
-MAX_STOP_PCT = 8
+MAX_STOP_PCT = 8             # stop bundan uzaksa oneri gosterilmez (10x'te riskli)
+MIN_STOP_PCT = 0.6           # stop bundan darsa oneri gosterilmez (normal dalgalanmada tetiklenir)
 
 # ---- TAKIP NOTU AYARLARI ----
 STATE_FILE = "signals.json"
@@ -68,6 +71,17 @@ def atr(highs, lows, closes, period=14):
     for tr in trs[period:]:
         a = (a * (period - 1) + tr) / period
     return a
+
+
+def looks_stable(t):
+    """Fiyati ~1$ civarinda ve 24s araligi %1'den dar olan coinleri stable sayar."""
+    try:
+        last = float(t["lastPrice"])
+        hi = float(t["highPrice"])
+        lo = float(t["lowPrice"])
+        return 0.95 <= last <= 1.05 and (hi - lo) / last < 0.01
+    except Exception:
+        return False
 
 
 def send(text):
@@ -177,8 +191,6 @@ def plan_lines(entry, lv):
         f"Hedef1 {fp(lv['tp1'])} | Hedef2 {fp(lv['tp2'])}",
         f"Risk {lv['risk']:.0f}$ | Pozisyon {lv['notional']:.0f}$ | Marjin {lv['margin']:.0f}$",
     ]
-    if lv["stop_pct"] > MAX_STOP_PCT:
-        lines.append("Uyari: Stop cok uzak, ATLA.")
     return lines
 
 
@@ -306,6 +318,7 @@ def main():
         t for t in tickers
         if t["symbol"].endswith("USDT") and t["symbol"][:-4] not in STABLES
         and float(t["quoteVolume"]) >= MIN_VOL_24H
+        and not looks_stable(t)
     ]
     pairs.sort(key=lambda t: float(t["quoteVolume"]), reverse=True)
     top = pairs[:TOP_N]
@@ -358,6 +371,8 @@ def main():
             body = [f"{' + '.join(reasons)}",
                     f"RSI {rs[i]:.0f} ({arrow}) | Hacim {ratio:.1f}x | 24s {float(t['priceChangePercent']):+.1f}%"]
             lv = plan_levels(d, closes[i], highs, lows, closes)
+            if lv["stop_pct"] < MIN_STOP_PCT or lv["stop_pct"] > MAX_STOP_PCT:
+                continue
             body += plan_lines(closes[i], lv)
             sig = {"sym": s, "d": d, "entry": closes[i], "stop": lv["stop"],
                    "tp1": lv["tp1"], "tp2": lv["tp2"], "t0": int(k[-1][6]) + 1,
