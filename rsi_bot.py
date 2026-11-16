@@ -22,7 +22,7 @@ MAX_RECS = 5                 # en fazla kac coin onerilsin
 VOL_SPIKE = 1.5              # hacim, son 20 mum ortalamasinin en az bu kati olmali
 
 # ---- ISLEM PLANI AYARLARI ----
-ACCOUNT_USDT = 1000          # <-- Binance Futures hesabindaki toplam bakiyen (USDT). Burayi guncelle!
+ACCOUNT_USDT = 50            # <-- Binance Futures hesabindaki toplam bakiyen (USDT). Burayi guncelle!
 RISK_PCT = 2
 LEVERAGE = 10
 ATR_MULT = 2.0
@@ -36,6 +36,12 @@ MIN_STOP_PCT = 0.6           # stop bundan darsa oneri gosterilmez (normal dalga
 STATE_FILE = "signals.json"
 TZ_NAME = "Europe/Istanbul"  # saatler bu saat diliminde yazilir
 FOLLOW_UP_HOURS = (1, 2)     # kac saat sonra sonuc notu gonderilsin
+
+# ---- STOP/HEDEF KARSILASTIRMA (arka planda ayni sinyallerle farkli ayarlari dener) ----
+STOP_GRID = (1.0, 1.5, 2.0, 3.0)   # stop mesafesi (ATR kati)
+TP_GRID = (1.0, 1.5, 2.0, 3.0)     # hedef (stop mesafesinin kaci)
+COST_FRAC = 0.0012                 # gidis-donus komisyon + kayma (islem tutarinin %0,12'si)
+MIN_GRID_N = 20                    # bu kadar sinyal birikmeden karsilastirma gosterilmez
 
 
 def rsi_series(closes, period=14):
@@ -126,6 +132,15 @@ def pct(v, digits=1):
     return f"{'-' if v < 0 else '+'}%{s}"
 
 
+def col(v):
+    """Kar = yesil, zarar = kirmizi kare (Telegram yaziyi boyayamaz, emoji kullaniriz)."""
+    if v > 0.05:
+        return "🟩"
+    if v < -0.05:
+        return "🟥"
+    return "⬜"
+
+
 def get_klines(symbol, interval, limit):
     k = requests.get(
         BASE + "/klines",
@@ -197,6 +212,7 @@ def plan_levels(d, entry, highs, lows, closes):
         "stop": entry - d * dist,
         "tp": entry + d * TARGET_R * dist,
         "stop_pct": dist / entry * 100,
+        "atr": dist / ATR_MULT,
         "risk": risk_real,
         "notional": notional,
     }
@@ -210,6 +226,7 @@ def load_state():
         st = {}
     st.setdefault("signals", [])
     st.setdefault("stats", {})
+    st.setdefault("grid", {})
     for h in FOLLOW_UP_HOURS:
         st["stats"].setdefault(f"r{h}", {"n": 0, "win": 0, "sum": 0.0})
     return st
@@ -227,6 +244,65 @@ def hhmm(ms):
     except Exception:
         tz = timezone(timedelta(hours=3))
     return datetime.fromtimestamp(ms / 1000, tz).strftime("%H:%M")
+
+
+def grid_update(state, sig, k):
+    """Ayni sinyali farkli stop/hedef kombinasyonlariyla simule eder (mum mum, stop once)."""
+    atr_v = sig.get("atr")
+    if not atr_v:
+        return
+    d, entry = sig["d"], sig["entry"]
+    final = float(k[-1][4])
+    for sm in STOP_GRID:
+        dist = sm * atr_v
+        stop = entry - d * dist
+        for tr in TP_GRID:
+            tp = entry + d * tr * dist
+            r = None
+            for c in k:
+                hi, lo = float(c[2]), float(c[3])
+                stop_hit = (lo <= stop) if d == 1 else (hi >= stop)
+                tp_hit = (hi >= tp) if d == 1 else (lo <= tp)
+                if stop_hit:          # ayni mumda ikisi de olduysa muhafazakar: stop once
+                    r = -1.0
+                    break
+                if tp_hit:
+                    r = float(tr)
+                    break
+            if r is None:             # ikisine de degmedi: sondaki fiyata gore
+                r = (final - entry) * d / dist
+            r -= COST_FRAC / (dist / entry)   # komisyon + kayma (R cinsinden)
+            g = state["grid"].setdefault(f"{sm}|{tr}", {"n": 0, "sum": 0.0})
+            g["n"] += 1
+            g["sum"] += r
+
+
+def grid_block(state):
+    g = state.get("grid", {})
+    rows = [(v["sum"] / v["n"], key, v["n"]) for key, v in g.items() if v["n"] >= MIN_GRID_N]
+    if not rows:
+        return None
+    rows.sort(reverse=True)
+    n = rows[0][2]
+
+    def name(key):
+        sm, tr = key.split("|")
+        return f"stop {sm.replace('.', ',')} ATR, hedef {tr.replace('.', ',')}R"
+
+    lines = [f"🧪 STOP/HEDEF KARŞILAŞTIRMASI ({n} sinyal, komisyon dahil, 2 saatlik pencere)"]
+    for avg, key, nn in rows[:3]:
+        lines.append(f"{name(key)}: ortalama {avg:+.2f}R".replace(".", ","))
+    cur = f"{ATR_MULT}|{TARGET_R}"
+    for avg, key, nn in rows:
+        if key == cur or key == f"{ATR_MULT}|{float(TARGET_R)}":
+            lines.append(f"Şu anki ayar ({name(key)}): {avg:+.2f}R".replace(".", ","))
+            break
+    best = rows[0][0]
+    if best <= 0:
+        lines.append("Hiçbir kombinasyon artıda değil: sorun stop/hedefte değil, giriş sinyalinde.")
+    else:
+        lines.append("Örneklem küçükse bu fark şans olabilir; en az 50-100 sinyal bekle.")
+    return "\n".join(lines)
 
 
 def follow_up(state, now_ms):
@@ -285,16 +361,17 @@ def follow_up(state, now_ms):
                     status = "✅ Hedefe değdi"
                 else:
                     status = "Hedefe de stopa da değmedi"
-                emoji = "🟢" if d == 1 else "🔴"
                 side = "LONG" if d == 1 else "SHORT"
                 text = (
-                    f"{emoji} {sig['sym'][:-4]}/USDT ({hhmm(sig['t0'])}) {side} önerisi\n"
+                    f"{col(acc)} {sig['sym'][:-4]}/USDT ({hhmm(sig['t0'])}) {side} önerisi\n"
                     f"Giriş: {fp(entry)} | Hedef: {fp(tp)} | Stop: {fp(sig['stop'])}\n"
                     f"Şu an fiyat: {fp(final)} ({hhmm(end_ms)})\n"
                     f"Fiyat değişimi: {pct(pnl, 2)}\n"
-                    f"Hesabına etkisi: {pct(acc)} (stop emri girilmişse)\n"
+                    f"Hesabına etkisi: {col(acc)} {pct(acc)} (stop emri girilmişse)\n"
                     f"{status}"
                 )
+                if h == max(FOLLOW_UP_HOURS):
+                    grid_update(state, sig, k)
                 items[h].append(text)
                 pnls[h].append(acc)
                 st = state["stats"][f"r{h}"]
@@ -315,9 +392,12 @@ def follow_up(state, now_ms):
         blocks.append(f"⏱ {h} SAAT SONRA - SONUÇLAR")
         blocks += items[h]
         blocks.append(
-            f"Özet: {len(p)} öneri, {wins} tanesi kârda. Toplam hesap etkisi: {pct(sum(p))}\n"
+            f"Özet: {len(p)} öneri, {wins} tanesi kârda. Toplam hesap etkisi: {col(sum(p))} {pct(sum(p))}\n"
             f"Genel ({h} saat): {st['n']} öneri, %{st['win'] / st['n'] * 100:.0f} kârda, "
-            f"toplam hesap etkisi: {pct(st['sum'])}")
+            f"toplam hesap etkisi: {col(st['sum'])} {pct(st['sum'])}")
+    gb = grid_block(state) if items[max(FOLLOW_UP_HOURS)] else None
+    if gb:
+        blocks.append(gb)
     if blocks:
         blocks.append("Hesap etkisi: stop yediyse -1R, hedefe değdiyse +1,5R üzerinden (R = hesabın %" + str(RISK_PCT) + "'si). Fiyatlar 15 dk mum kapanışıdır; komisyon ve kayma dahil değil.")
     return blocks
@@ -399,7 +479,7 @@ def main():
                 f"Neden: {', '.join(reasons)}"
             )
             sig = {"sym": s, "d": d, "entry": closes[i], "stop": lv["stop"],
-                   "tp": lv["tp"], "t0": t0, "done": []}
+                   "tp": lv["tp"], "atr": lv["atr"], "t0": t0, "done": []}
             recs.append((total, ratio, text, sig))
         except Exception as e:
             print(s, "hata:", e)
