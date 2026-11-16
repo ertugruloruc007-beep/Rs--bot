@@ -26,6 +26,8 @@ ACCOUNT_USDT = 1000          # <-- Binance Futures hesabindaki toplam bakiyen (U
 RISK_PCT = 2
 LEVERAGE = 10
 ATR_MULT = 2.0
+BTC_FILTER = True            # BTC 1s trendinin tersine islem onerme
+TARGET_R = 1.5               # hedef = stop mesafesinin 1.5 kati
 MAX_MARGIN_PCT = 30
 MAX_STOP_PCT = 8             # stop bundan uzaksa oneri gosterilmez (10x'te riskli)
 MIN_STOP_PCT = 0.6           # stop bundan darsa oneri gosterilmez (normal dalgalanmada tetiklenir)
@@ -104,7 +106,24 @@ def send_chunks(blocks):
 
 
 def fp(x):
-    return f"{x:.6g}"
+    """Fiyati okunur yazar (1,55 gibi). Bilimsel gosterim kullanmaz."""
+    if x >= 100:
+        dec = 2
+    elif x >= 1:
+        dec = 4
+    elif x >= 0.01:
+        dec = 5
+    elif x >= 0.0001:
+        dec = 7
+    else:
+        dec = 9
+    s = f"{x:.{dec}f}".rstrip("0").rstrip(".")
+    return s.replace(".", ",")
+
+
+def pct(v, digits=1):
+    s = f"{abs(v):.{digits}f}".replace(".", ",")
+    return f"{'-' if v < 0 else '+'}%{s}"
 
 
 def get_klines(symbol, interval, limit):
@@ -144,7 +163,7 @@ def eval_dir(d, i, closes, vols, rs, e9, e21, e50):
     for j in range(i - 2, i + 1):
         if (e9[j] - e21[j]) * d > 0 and (e9[j - 1] - e21[j - 1]) * d <= 0:
             cross = True
-    pts["EMA9/21 kesisim"] = cross and (e9[i] - e21[i]) * d > 0
+    pts["EMA kesişim"] = cross and (e9[i] - e21[i]) * d > 0
     # 3) RSI: ya momentum bolgesinde ya da asiri bolgeden toparlaniyor
     if d == 1:
         mom = 50 <= r <= 70 and r > rs[i - 3]
@@ -176,22 +195,11 @@ def plan_levels(d, entry, highs, lows, closes):
         risk_real = notional / entry * dist
     return {
         "stop": entry - d * dist,
-        "tp1": entry + d * dist,
-        "tp2": entry + d * 2 * dist,
+        "tp": entry + d * TARGET_R * dist,
         "stop_pct": dist / entry * 100,
         "risk": risk_real,
         "notional": notional,
-        "margin": notional / LEVERAGE,
     }
-
-
-def plan_lines(entry, lv):
-    lines = [
-        f"Giris ~{fp(entry)} | Stop {fp(lv['stop'])} (%{lv['stop_pct']:.1f})",
-        f"Hedef1 {fp(lv['tp1'])} | Hedef2 {fp(lv['tp2'])}",
-        f"Risk {lv['risk']:.0f}$ | Pozisyon {lv['notional']:.0f}$ | Marjin {lv['margin']:.0f}$",
-    ]
-    return lines
 
 
 def load_state():
@@ -203,7 +211,7 @@ def load_state():
     st.setdefault("signals", [])
     st.setdefault("stats", {})
     for h in FOLLOW_UP_HOURS:
-        st["stats"].setdefault(str(h), {"n": 0, "win": 0, "sum": 0.0})
+        st["stats"].setdefault(f"r{h}", {"n": 0, "win": 0, "sum": 0.0})
     return st
 
 
@@ -248,41 +256,51 @@ def follow_up(state, now_ms):
                 if len(k) < n_c:
                     continue
                 d, entry = sig["d"], sig["entry"]
+                tp = sig.get("tp", sig.get("tp1"))
                 final = float(k[-1][4])
                 hi = max(float(c[2]) for c in k)
                 lo = min(float(c[3]) for c in k)
                 price_chg = (final / entry - 1) * 100
                 if d == 1:
                     pnl = price_chg
-                    best = (hi / entry - 1) * 100
-                    worst = (lo / entry - 1) * 100
                     stop_hit = lo <= sig["stop"]
-                    t1 = hi >= sig["tp1"]
-                    t2 = hi >= sig["tp2"]
+                    tp_hit = hi >= tp
                 else:
                     pnl = -price_chg
-                    best = (1 - lo / entry) * 100
-                    worst = (1 - hi / entry) * 100
                     stop_hit = hi >= sig["stop"]
-                    t1 = lo <= sig["tp1"]
-                    t2 = lo <= sig["tp2"]
+                    tp_hit = lo <= tp
+                stop_pct = abs(entry - sig["stop"]) / entry * 100
+                if stop_hit and not tp_hit:
+                    r_eff = -1.0
+                elif tp_hit and not stop_hit:
+                    r_eff = TARGET_R
+                else:
+                    r_eff = pnl / stop_pct
+                acc = r_eff * RISK_PCT
+                if stop_hit and tp_hit:
+                    status = "Stop ve hedef ikisi de görüldü (sıra belirsiz)"
+                elif stop_hit:
+                    status = "❌ Stop'a değdi"
+                elif tp_hit:
+                    status = "✅ Hedefe değdi"
+                else:
+                    status = "Hedefe de stopa da değmedi"
+                emoji = "🟢" if d == 1 else "🔴"
                 side = "LONG" if d == 1 else "SHORT"
                 text = (
-                    f"{sig['sym'][:-4]}/USDT {side} ({hhmm(sig['t0'])} onerisi)\n"
-                    f"{fp(entry)} -> {fp(final)} (fiyat %{price_chg:+.2f})\n"
-                    f"Islem: %{pnl:+.2f} {'kazanc' if pnl > 0 else 'zarar'} "
-                    f"| {LEVERAGE}x ile ~%{pnl * LEVERAGE:+.1f}\n"
-                    f"Aralik: en iyi %{best:+.1f}, en kotu %{worst:+.1f}\n"
-                    f"Stop {'DEGDI' if stop_hit else 'degmedi'} | "
-                    f"Hedef1 {'degdi' if t1 else 'degmedi'} | "
-                    f"Hedef2 {'degdi' if t2 else 'degmedi'}"
+                    f"{emoji} {sig['sym'][:-4]}/USDT ({hhmm(sig['t0'])}) {side} önerisi\n"
+                    f"Giriş: {fp(entry)} | Hedef: {fp(tp)} | Stop: {fp(sig['stop'])}\n"
+                    f"Şu an fiyat: {fp(final)} ({hhmm(end_ms)})\n"
+                    f"Fiyat değişimi: {pct(pnl, 2)}\n"
+                    f"Hesabına etkisi: {pct(acc)} (stop emri girilmişse)\n"
+                    f"{status}"
                 )
                 items[h].append(text)
-                pnls[h].append(pnl)
-                st = state["stats"][key]
+                pnls[h].append(acc)
+                st = state["stats"][f"r{h}"]
                 st["n"] += 1
-                st["win"] += 1 if pnl > 0 else 0
-                st["sum"] += pnl
+                st["win"] += 1 if acc > 0 else 0
+                st["sum"] += acc
                 sig["done"].append(key)
             except Exception as e:
                 print(sig["sym"], "takip hatasi:", e)
@@ -293,15 +311,15 @@ def follow_up(state, now_ms):
             continue
         p = pnls[h]
         wins = sum(1 for x in p if x > 0)
-        st = state["stats"][str(h)]
-        blocks.append(f"{h} SAAT SONRA - ONERI TAKIP NOTLARI")
+        st = state["stats"][f"r{h}"]
+        blocks.append(f"⏱ {h} SAAT SONRA - SONUÇLAR")
         blocks += items[h]
         blocks.append(
-            f"Bu grup: {len(p)} oneri, {wins} tanesi yonunde, ort %{sum(p) / len(p):+.2f}\n"
-            f"Genel ({h}s): {st['n']} oneri, %{st['win'] / st['n'] * 100:.0f} yonunde, "
-            f"ort %{st['sum'] / st['n']:+.2f}")
+            f"Özet: {len(p)} öneri, {wins} tanesi kârda. Toplam hesap etkisi: {pct(sum(p))}\n"
+            f"Genel ({h} saat): {st['n']} öneri, %{st['win'] / st['n'] * 100:.0f} kârda, "
+            f"toplam hesap etkisi: {pct(st['sum'])}")
     if blocks:
-        blocks.append("Fiyatlar 15dk mum kapanislaridir; komisyon ve kayma dahil degil.")
+        blocks.append("Hesap etkisi: stop yediyse -1R, hedefe değdiyse +1,5R üzerinden (R = hesabın %" + str(RISK_PCT) + "'si). Fiyatlar 15 dk mum kapanışıdır; komisyon ve kayma dahil değil.")
     return blocks
 
 
@@ -323,6 +341,7 @@ def main():
     pairs.sort(key=lambda t: float(t["quoteVolume"]), reverse=True)
     top = pairs[:TOP_N]
 
+    btc = htf_trend("BTCUSDT")
     recs = []
     for t in top:
         s = t["symbol"]
@@ -349,6 +368,8 @@ def main():
             if best is None:
                 continue
             d, n, pts, ratio = best
+            if BTC_FILTER and s != "BTCUSDT" and btc in (1, -1) and d != btc:
+                continue
 
             h = htf_trend(s)
             h_ok = (h == d)
@@ -365,42 +386,40 @@ def main():
             reasons = [name for name, ok in pts.items() if ok]
             if h_ok:
                 reasons.append("1s trend")
-            side = "LONG" if d == 1 else "SHORT"
-            arrow = "yukari" if d == 1 else "asagi"
-            head = f"{s[:-4]}/USDT  {side}  Skor {total}/5"
-            body = [f"{' + '.join(reasons)}",
-                    f"RSI {rs[i]:.0f} ({arrow}) | Hacim {ratio:.1f}x | 24s {float(t['priceChangePercent']):+.1f}%"]
             lv = plan_levels(d, closes[i], highs, lows, closes)
             if lv["stop_pct"] < MIN_STOP_PCT or lv["stop_pct"] > MAX_STOP_PCT:
                 continue
-            body += plan_lines(closes[i], lv)
+            t0 = int(k[-1][6]) + 1
+            emoji = "🟢" if d == 1 else "🔴"
+            side = "LONG" if d == 1 else "SHORT"
+            text = (
+                f"{emoji} {s[:-4]}/USDT ({hhmm(t0)}) {side} önerisi\n"
+                f"Giriş: {fp(closes[i])} | Hedef: {fp(lv['tp'])} | Stop: {fp(lv['stop'])}\n"
+                f"Pozisyon: {lv['notional']:.0f}$ (risk {lv['risk']:.0f}$) | Skor {total}/5\n"
+                f"Neden: {', '.join(reasons)}"
+            )
             sig = {"sym": s, "d": d, "entry": closes[i], "stop": lv["stop"],
-                   "tp1": lv["tp1"], "tp2": lv["tp2"], "t0": int(k[-1][6]) + 1,
-                   "done": []}
-            recs.append((total, ratio, head + "\n" + "\n".join(body), sig))
+                   "tp": lv["tp"], "t0": t0, "done": []}
+            recs.append((total, ratio, text, sig))
         except Exception as e:
             print(s, "hata:", e)
 
     outgoing = []
     if recs:
         recs.sort(key=lambda x: (x[0], x[1]), reverse=True)
-        btc = htf_trend("BTCUSDT")
-        btc_txt = {1: "YUKARI", -1: "ASAGI", 0: "YATAY", None: "?"}[btc]
+        btc_txt = {1: "YUKARI", -1: "AŞAĞI", 0: "YATAY", None: "?"}[btc]
         shown = recs[:MAX_RECS]
-        head = (f"15DK TARAMA - ONERILEN COINLER\n"
-                f"BTC 1s trend: {btc_txt} | {len(recs)} oneri, en iyi {len(shown)}\n"
-                f"Risk %{RISK_PCT} = {ACCOUNT_USDT * RISK_PCT / 100:.0f}$, {LEVERAGE}x")
-        outgoing.append(head)
-        outgoing += [f"{n}) {r[2]}" for n, r in enumerate(shown, 1)]
+        outgoing.append(f"📊 15 DK ÖNERİLER ({len(shown)} coin)\n"
+                        f"BTC 1 saatlik trend: {btc_txt}")
+        outgoing += [r[2] for r in shown]
         outgoing.append(
-            "Skor = teknik uyum sayisidir (EMA trend, EMA kesisim, RSI, hacim, 1s trend), "
-            "kazanma olasiligi degil. Hedef1'de yarisini kapat, stopu girise cek. "
-            "Girer girmez Stop Market emri gir. Ayni yonde en fazla 1-2 islem ac. "
-            "Yatirim tavsiyesi degildir.")
+            "Skor, teknik uyum sayısıdır; kazanma olasılığı değildir. "
+            "İşleme girer girmez Stop emrini borsaya gir. "
+            "Aynı yönde en fazla 1-2 işlem aç. Yatırım tavsiyesi değildir.")
         state["signals"] += [r[3] for r in shown]
     outgoing += fu_blocks
     if not recs and MANUAL:
-        outgoing.insert(0, f"Test basarili. {len(top)} coin tarandi, su an yeni oneri yok.")
+        outgoing.insert(0, f"Test başarılı. {len(top)} coin tarandı, şu an yeni öneri yok.")
     if outgoing:
         send_chunks(outgoing)
     save_state(state)
