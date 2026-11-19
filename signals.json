@@ -2,20 +2,33 @@
  "version": 2,
  "signals": [
   {
+   "sym": "ZECUSDT",
+   "d": -1,
+   "entry": 957.2,
+   "t0": 1795088700000
+  },
+  {
+   "sym": "PEPEUSDT",
+   "d": -1,
+   "entry": 3.95e-06,
+   "t0": 1795088700000
+  },
+  {
    "sym": "CRCLBUSDT",
    "d": -1,
-   "entry": 55.49,
-   "t0": 1795081500000
+   "entry": 55.75,
+   "t0": 1795088700000
   }
  ],
  "sent": {
   "SOLUSDT|high": 1795070475121,
-  "ZECUSDT|high": 1795070475121,
-  "CRCLBUSDT|high": 1795082286831
+  "ZECUSDT|high": 1795089096919,
+  "CRCLBUSDT|high": 1795089096919,
+  "PEPEUSDT|high": 1795089096919
  },
  "stats": {
-  "n": 4,
+  "n": 5,
   "win": 3,
-  "sum": 0.44066964711498846
+  "sum": -0.027883245298065962
  }
 }
