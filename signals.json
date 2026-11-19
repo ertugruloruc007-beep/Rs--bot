@@ -2,38 +2,34 @@
  "version": 2,
  "signals": [
   {
-   "sym": "ZECUSDT",
-   "d": -1,
-   "entry": 957.2,
-   "t0": 1795088700000
-  },
-  {
-   "sym": "PEPEUSDT",
-   "d": -1,
-   "entry": 3.95e-06,
-   "t0": 1795088700000
-  },
-  {
-   "sym": "CRCLBUSDT",
-   "d": -1,
-   "entry": 55.75,
-   "t0": 1795088700000
-  },
-  {
    "sym": "PEPEUSDT",
    "d": 0,
    "entry": 4.02e-06,
    "t0": 1795092300000
+  },
+  {
+   "sym": "MMTUSDT",
+   "d": 0,
+   "entry": 0.2313,
+   "t0": 1795097700000
+  },
+  {
+   "sym": "SPCXBUSDT",
+   "d": 0,
+   "entry": 144.92,
+   "t0": 1795097700000
   }
  ],
  "sent": {
   "ZECUSDT|high": 1795089096919,
   "CRCLBUSDT|high": 1795089096919,
-  "PEPEUSDT|high": 1795093165152
+  "PEPEUSDT|high": 1795093165152,
+  "MMTUSDT|high": 1795097926589,
+  "SPCXBUSDT|low": 1795097926589
  },
  "stats": {
-  "n": 5,
-  "win": 3,
-  "sum": -0.027883245298065962
+  "n": 8,
+  "win": 5,
+  "sum": 1.4324177034232388
  }
 }
