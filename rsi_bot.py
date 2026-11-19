@@ -10,38 +10,20 @@ CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
 MANUAL = os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch"
 
 BASE = "https://data-api.binance.vision/api/v3"
-TOP_N = 300
-MIN_VOL_24H = 5_000_000
+
+# ---- AYARLAR ----
+RSI_LOW = 30                 # RSI bunun altina dusunce sinyal
+RSI_HIGH = 70                # RSI bunun ustune cikinca sinyal
+TOP_N = 100                  # 24s hacmine gore en buyuk kac coin taransin
+MIN_VOL_24H = 20_000_000     # 24s hacmi (USDT) bunun altindaki coinler taranmaz
+MAX_RECS = 8                 # bir mesajda en fazla kac coin onerilsin
+COOLDOWN_MIN = 60            # ayni coin/sinyal icin tekrar uyari beklemesi (dakika)
+FOLLOW_UP_HOURS = 2          # kac saat sonra sonuc notu gonderilsin
+STATE_FILE = "signals.json"
+TZ_NAME = "Europe/Istanbul"  # saatler bu saat diliminde yazilir
 STABLES = {"USDC", "FDUSD", "TUSD", "USDP", "DAI", "EUR", "TRY", "BUSD",
            "BFUSD", "USD1", "USDE", "RLUSD", "XUSD", "USDS", "PYUSD", "AEUR",
            "USDD", "EURI", "EURC", "FRAX", "UST"}
-
-# ---- ONERI AYARLARI ----
-MIN_SCORE = 3                # 5 uzerinden en az bu skoru alan coinler onerilir
-MAX_RECS = 5                 # en fazla kac coin onerilsin
-VOL_SPIKE = 1.5              # hacim, son 20 mum ortalamasinin en az bu kati olmali
-
-# ---- ISLEM PLANI AYARLARI ----
-ACCOUNT_USDT = 50            # <-- Binance Futures hesabindaki toplam bakiyen (USDT). Burayi guncelle!
-RISK_PCT = 2
-LEVERAGE = 10
-ATR_MULT = 2.0
-BTC_FILTER = True            # BTC 1s trendinin tersine islem onerme
-TARGET_R = 1.5               # hedef = stop mesafesinin 1.5 kati
-MAX_MARGIN_PCT = 30
-MAX_STOP_PCT = 8             # stop bundan uzaksa oneri gosterilmez (10x'te riskli)
-MIN_STOP_PCT = 0.6           # stop bundan darsa oneri gosterilmez (normal dalgalanmada tetiklenir)
-
-# ---- TAKIP NOTU AYARLARI ----
-STATE_FILE = "signals.json"
-TZ_NAME = "Europe/Istanbul"  # saatler bu saat diliminde yazilir
-FOLLOW_UP_HOURS = (1, 2)     # kac saat sonra sonuc notu gonderilsin
-
-# ---- STOP/HEDEF KARSILASTIRMA (arka planda ayni sinyallerle farkli ayarlari dener) ----
-STOP_GRID = (1.0, 1.5, 2.0, 3.0)   # stop mesafesi (ATR kati)
-TP_GRID = (1.0, 1.5, 2.0, 3.0)     # hedef (stop mesafesinin kaci)
-COST_FRAC = 0.0012                 # gidis-donus komisyon + kayma (islem tutarinin %0,12'si)
-MIN_GRID_N = 20                    # bu kadar sinyal birikmeden karsilastirma gosterilmez
 
 
 def rsi_series(closes, period=14):
@@ -67,18 +49,6 @@ def ema_series(values, span):
     for v in values[1:]:
         out.append(v * k + out[-1] * (1 - k))
     return out
-
-
-def atr(highs, lows, closes, period=14):
-    trs = []
-    for i in range(1, len(closes)):
-        trs.append(max(highs[i] - lows[i],
-                       abs(highs[i] - closes[i - 1]),
-                       abs(lows[i] - closes[i - 1])))
-    a = sum(trs[:period]) / period
-    for tr in trs[period:]:
-        a = (a * (period - 1) + tr) / period
-    return a
 
 
 def looks_stable(t):
@@ -141,100 +111,10 @@ def col(v):
     return "⬜"
 
 
-def get_klines(symbol, interval, limit):
-    k = requests.get(
-        BASE + "/klines",
-        params={"symbol": symbol, "interval": interval, "limit": limit},
-        timeout=20,
-    ).json()
-    return k[:-1]  # son (acik) mumu atla
-
-
-def htf_trend(symbol):
-    """1 saatlik trend: 1 yukari, -1 asagi, 0 yatay, None bilinmiyor"""
-    try:
-        k = get_klines(symbol, "1h", 120)
-        closes = [float(c[4]) for c in k]
-        e21 = ema_series(closes, 21)[-1]
-        e50 = ema_series(closes, 50)[-1]
-        if closes[-1] > e21 > e50:
-            return 1
-        if closes[-1] < e21 < e50:
-            return -1
-        return 0
-    except Exception:
-        return None
-
-
-def eval_dir(d, i, closes, vols, rs, e9, e21, e50):
-    """15dk icin 4 kosulu degerlendirir. d: 1 long, -1 short."""
-    c = closes[i]
-    r = rs[i]
-    pts = {}
-    # 1) EMA trend: EMA21, EMA50'nin uzerinde (long) ve fiyat EMA21 uzerinde
-    pts["EMA trend"] = (e21[i] - e50[i]) * d > 0 and (c - e21[i]) * d > 0
-    # 2) EMA9/EMA21 kesisimi son 3 mumda
-    cross = False
-    for j in range(i - 2, i + 1):
-        if (e9[j] - e21[j]) * d > 0 and (e9[j - 1] - e21[j - 1]) * d <= 0:
-            cross = True
-    pts["EMA kesişim"] = cross and (e9[i] - e21[i]) * d > 0
-    # 3) RSI: ya momentum bolgesinde ya da asiri bolgeden toparlaniyor
-    if d == 1:
-        mom = 50 <= r <= 70 and r > rs[i - 3]
-        reb = (min(rs[i - 8:i + 1]) < 30 and 35 <= r <= 60
-               and r > rs[i - 1] and c > e9[i])
-    else:
-        mom = 30 <= r <= 50 and r < rs[i - 3]
-        reb = (max(rs[i - 8:i + 1]) > 70 and 40 <= r <= 65
-               and r < rs[i - 1] and c < e9[i])
-    pts["RSI"] = mom or reb
-    # 4) Hacim
-    avg = sum(vols[i - 20:i]) / 20
-    ratio = vols[i] / avg if avg > 0 else 0
-    pts["Hacim"] = ratio >= VOL_SPIKE
-    # asiri uzamis hareketi kovalama
-    if (d == 1 and r > 72) or (d == -1 and r < 28):
-        pts = {k: False for k in pts}
-    return pts, ratio
-
-
-def plan_levels(d, entry, highs, lows, closes):
-    dist = ATR_MULT * atr(highs, lows, closes)
-    risk_amt = ACCOUNT_USDT * RISK_PCT / 100
-    notional = risk_amt / dist * entry
-    cap = ACCOUNT_USDT * LEVERAGE * MAX_MARGIN_PCT / 100
-    risk_real = risk_amt
-    if notional > cap:
-        notional = cap
-        risk_real = notional / entry * dist
-    return {
-        "stop": entry - d * dist,
-        "tp": entry + d * TARGET_R * dist,
-        "stop_pct": dist / entry * 100,
-        "atr": dist / ATR_MULT,
-        "risk": risk_real,
-        "notional": notional,
-    }
-
-
-def load_state():
-    try:
-        with open(STATE_FILE) as f:
-            st = json.load(f)
-    except Exception:
-        st = {}
-    st.setdefault("signals", [])
-    st.setdefault("stats", {})
-    st.setdefault("grid", {})
-    for h in FOLLOW_UP_HOURS:
-        st["stats"].setdefault(f"r{h}", {"n": 0, "win": 0, "sum": 0.0})
-    return st
-
-
-def save_state(st):
-    with open(STATE_FILE, "w") as f:
-        json.dump(st, f, indent=1)
+def fmt_usd(x):
+    if x >= 1e9:
+        return f"{x / 1e9:.1f} milyar$"
+    return f"{x / 1e6:.0f} milyon$"
 
 
 def hhmm(ms):
@@ -246,160 +126,120 @@ def hhmm(ms):
     return datetime.fromtimestamp(ms / 1000, tz).strftime("%H:%M")
 
 
-def grid_update(state, sig, k):
-    """Ayni sinyali farkli stop/hedef kombinasyonlariyla simule eder (mum mum, stop once)."""
-    atr_v = sig.get("atr")
-    if not atr_v:
-        return
-    d, entry = sig["d"], sig["entry"]
-    final = float(k[-1][4])
-    for sm in STOP_GRID:
-        dist = sm * atr_v
-        stop = entry - d * dist
-        for tr in TP_GRID:
-            tp = entry + d * tr * dist
-            r = None
-            for c in k:
-                hi, lo = float(c[2]), float(c[3])
-                stop_hit = (lo <= stop) if d == 1 else (hi >= stop)
-                tp_hit = (hi >= tp) if d == 1 else (lo <= tp)
-                if stop_hit:          # ayni mumda ikisi de olduysa muhafazakar: stop once
-                    r = -1.0
-                    break
-                if tp_hit:
-                    r = float(tr)
-                    break
-            if r is None:             # ikisine de degmedi: sondaki fiyata gore
-                r = (final - entry) * d / dist
-            r -= COST_FRAC / (dist / entry)   # komisyon + kayma (R cinsinden)
-            g = state["grid"].setdefault(f"{sm}|{tr}", {"n": 0, "sum": 0.0})
-            g["n"] += 1
-            g["sum"] += r
+def get_klines(symbol, interval, limit):
+    k = requests.get(
+        BASE + "/klines",
+        params={"symbol": symbol, "interval": interval, "limit": limit},
+        timeout=20,
+    ).json()
+    return k[:-1]  # son (acik) mumu atla
 
 
-def grid_block(state):
-    g = state.get("grid", {})
-    rows = [(v["sum"] / v["n"], key, v["n"]) for key, v in g.items() if v["n"] >= MIN_GRID_N]
-    if not rows:
-        return None
-    rows.sort(reverse=True)
-    n = rows[0][2]
+def btc_trend():
+    """BTC 1 saatlik trend: 1 yukari, -1 asagi, 0 yatay"""
+    try:
+        k = get_klines("BTCUSDT", "1h", 120)
+        closes = [float(c[4]) for c in k]
+        e21 = ema_series(closes, 21)[-1]
+        e50 = ema_series(closes, 50)[-1]
+        c = closes[-1]
+        if e21 > e50 and c > e50:
+            return 1
+        if e21 < e50 and c < e50:
+            return -1
+        return 0
+    except Exception:
+        return 0
 
-    def name(key):
-        sm, tr = key.split("|")
-        return f"stop {sm.replace('.', ',')} ATR, hedef {tr.replace('.', ',')}R"
 
-    lines = [f"🧪 STOP/HEDEF KARŞILAŞTIRMASI ({n} sinyal, komisyon dahil, 2 saatlik pencere)"]
-    for avg, key, nn in rows[:3]:
-        lines.append(f"{name(key)}: ortalama {avg:+.2f}R".replace(".", ","))
-    cur = f"{ATR_MULT}|{TARGET_R}"
-    for avg, key, nn in rows:
-        if key == cur or key == f"{ATR_MULT}|{float(TARGET_R)}":
-            lines.append(f"Şu anki ayar ({name(key)}): {avg:+.2f}R".replace(".", ","))
-            break
-    best = rows[0][0]
-    if best <= 0:
-        lines.append("Hiçbir kombinasyon artıda değil: sorun stop/hedefte değil, giriş sinyalinde.")
-    else:
-        lines.append("Örneklem küçükse bu fark şans olabilir; en az 50-100 sinyal bekle.")
-    return "\n".join(lines)
+def load_state():
+    try:
+        with open(STATE_FILE) as f:
+            st = json.load(f)
+    except Exception:
+        st = {}
+    if st.get("version") != 2:          # eski surum kayitlari temizlenir
+        st = {"version": 2}
+    st.setdefault("signals", [])
+    st.setdefault("sent", {})
+    st.setdefault("stats", {"n": 0, "win": 0, "sum": 0.0})
+    return st
+
+
+def save_state(st):
+    with open(STATE_FILE, "w") as f:
+        json.dump(st, f, indent=1)
 
 
 def follow_up(state, now_ms):
-    """Suresi dolan onerilerin sonucunu hesaplar, mesaj bloklari dondurur."""
-    items = {h: [] for h in FOLLOW_UP_HOURS}
-    pnls = {h: [] for h in FOLLOW_UP_HOURS}
+    """2 saati dolan onerilerin sonucunu hesaplar, mesaj bloklari dondurur."""
+    items = []
+    gains = []
+    keep = []
     for sig in state["signals"]:
-        for h in FOLLOW_UP_HOURS:
-            key = str(h)
-            if key in sig["done"]:
+        end_ms = sig["t0"] + FOLLOW_UP_HOURS * 3600 * 1000
+        if now_ms < end_ms + 5000:
+            keep.append(sig)
+            continue
+        if now_ms > end_ms + 6 * 3600 * 1000:      # cok gec kalmis, vazgec
+            continue
+        n_c = 4 * FOLLOW_UP_HOURS
+        try:
+            k = requests.get(
+                BASE + "/klines",
+                params={"symbol": sig["sym"], "interval": "15m",
+                        "startTime": sig["t0"], "limit": n_c},
+                timeout=20,
+            ).json()
+            k = [c for c in k if c[6] < now_ms]    # sadece kapanmis mumlar
+            if len(k) < n_c:
+                keep.append(sig)
                 continue
-            n_c = 4 * h
-            end_ms = sig["t0"] + h * 3600 * 1000
-            if now_ms < end_ms + 5000:
-                continue
-            if now_ms > end_ms + 6 * 3600 * 1000:   # cok gec kalmis, vazgec
-                sig["done"].append(key)
-                continue
-            try:
-                k = requests.get(
-                    BASE + "/klines",
-                    params={"symbol": sig["sym"], "interval": "15m",
-                            "startTime": sig["t0"], "limit": n_c},
-                    timeout=20,
-                ).json()
-                k = [c for c in k if c[6] < now_ms]   # sadece kapanmis mumlar
-                if len(k) < n_c:
-                    continue
-                d, entry = sig["d"], sig["entry"]
-                tp = sig.get("tp", sig.get("tp1"))
-                final = float(k[-1][4])
-                hi = max(float(c[2]) for c in k)
-                lo = min(float(c[3]) for c in k)
-                price_chg = (final / entry - 1) * 100
-                if d == 1:
-                    pnl = price_chg
-                    stop_hit = lo <= sig["stop"]
-                    tp_hit = hi >= tp
-                else:
-                    pnl = -price_chg
-                    stop_hit = hi >= sig["stop"]
-                    tp_hit = lo <= tp
-                stop_pct = abs(entry - sig["stop"]) / entry * 100
-                if stop_hit and not tp_hit:
-                    r_eff = -1.0
-                elif tp_hit and not stop_hit:
-                    r_eff = TARGET_R
-                else:
-                    r_eff = pnl / stop_pct
-                acc = r_eff * RISK_PCT
-                if stop_hit and tp_hit:
-                    status = "Stop ve hedef ikisi de görüldü (sıra belirsiz)"
-                elif stop_hit:
-                    status = "❌ Stop'a değdi"
-                elif tp_hit:
-                    status = "✅ Hedefe değdi"
-                else:
-                    status = "Hedefe de stopa da değmedi"
-                side = "LONG" if d == 1 else "SHORT"
-                text = (
-                    f"{col(acc)} {sig['sym'][:-4]}/USDT ({hhmm(sig['t0'])}) {side} önerisi\n"
-                    f"Giriş: {fp(entry)} | Hedef: {fp(tp)} | Stop: {fp(sig['stop'])}\n"
-                    f"Şu an fiyat: {fp(final)} ({hhmm(end_ms)})\n"
-                    f"Fiyat değişimi: {pct(pnl, 2)}\n"
-                    f"Hesabına etkisi: {col(acc)} {pct(acc)} (stop emri girilmişse)\n"
-                    f"{status}"
-                )
-                if h == max(FOLLOW_UP_HOURS):
-                    grid_update(state, sig, k)
-                items[h].append(text)
-                pnls[h].append(acc)
-                st = state["stats"][f"r{h}"]
+            entry, d = sig["entry"], sig["d"]
+            final = float(k[-1][4])
+            hi = max(float(c[2]) for c in k)
+            lo = min(float(c[3]) for c in k)
+            chg = (final / entry - 1) * 100
+            up = (hi / entry - 1) * 100
+            down = (lo / entry - 1) * 100
+            side = {1: "LONG", -1: "SHORT", 0: "izleme"}[d]
+            if d != 0:
+                gain = chg * d
+                head = f"{col(gain)} {sig['sym'][:-4]}/USDT ({hhmm(sig['t0'])}) {side} önerisi"
+                result = f"Önerilen yönde sonuç: {col(gain)} {pct(gain, 2)}"
+                gains.append(gain)
+                st = state["stats"]
                 st["n"] += 1
-                st["win"] += 1 if acc > 0 else 0
-                st["sum"] += acc
-                sig["done"].append(key)
-            except Exception as e:
-                print(sig["sym"], "takip hatasi:", e)
+                st["win"] += 1 if gain > 0 else 0
+                st["sum"] += gain
+            else:
+                head = f"⬜ {sig['sym'][:-4]}/USDT ({hhmm(sig['t0'])}) izleme"
+                result = "Yön önerilmediği için kâr/zarar hesaplanmadı"
+            items.append(
+                f"{head}\n"
+                f"{fp(entry)} → {fp(final)} ({hhmm(end_ms)})\n"
+                f"Fiyat 2 saatte {pct(chg, 2)} {'yükseldi' if chg > 0 else 'düştü'}\n"
+                f"2 saat içinde en yüksek {pct(up)}, en düşük {pct(down)}\n"
+                f"{result}"
+            )
+        except Exception as e:
+            print(sig["sym"], "takip hatasi:", e)
+            keep.append(sig)
+    state["signals"] = keep
 
     blocks = []
-    for h in FOLLOW_UP_HOURS:
-        if not items[h]:
-            continue
-        p = pnls[h]
-        wins = sum(1 for x in p if x > 0)
-        st = state["stats"][f"r{h}"]
-        blocks.append(f"⏱ {h} SAAT SONRA - SONUÇLAR")
-        blocks += items[h]
-        blocks.append(
-            f"Özet: {len(p)} öneri, {wins} tanesi kârda. Toplam hesap etkisi: {col(sum(p))} {pct(sum(p))}\n"
-            f"Genel ({h} saat): {st['n']} öneri, %{st['win'] / st['n'] * 100:.0f} kârda, "
-            f"toplam hesap etkisi: {col(st['sum'])} {pct(st['sum'])}")
-    gb = grid_block(state) if items[max(FOLLOW_UP_HOURS)] else None
-    if gb:
-        blocks.append(gb)
-    if blocks:
-        blocks.append("Hesap etkisi: stop yediyse -1R, hedefe değdiyse +1,5R üzerinden (R = hesabın %" + str(RISK_PCT) + "'si). Fiyatlar 15 dk mum kapanışıdır; komisyon ve kayma dahil değil.")
+    if items:
+        blocks.append(f"⏱ {FOLLOW_UP_HOURS} SAAT SONRA - SONUÇLAR")
+        blocks += items
+        if gains:
+            wins = sum(1 for g in gains if g > 0)
+            st = state["stats"]
+            blocks.append(
+                f"Özet: {len(gains)} öneri, {wins} tanesi önerilen yönde kazandırdı. "
+                f"Ortalama: {col(sum(gains) / len(gains))} {pct(sum(gains) / len(gains), 2)}\n"
+                f"Genel: {st['n']} öneri, %{st['win'] / st['n'] * 100:.0f} kazandırdı, "
+                f"ortalama {col(st['sum'] / st['n'])} {pct(st['sum'] / st['n'], 2)}")
+        blocks.append("Yüzdeler fiyat değişimidir (kaldıraçsız); komisyon dahil değil.")
     return blocks
 
 
@@ -407,9 +247,6 @@ def main():
     state = load_state()
     now_ms = int(time.time() * 1000)
     fu_blocks = follow_up(state, now_ms)
-    state["signals"] = [s for s in state["signals"]
-                        if len(s["done"]) < len(FOLLOW_UP_HOURS)]
-    save_state(state)
 
     tickers = requests.get(BASE + "/ticker/24hr", timeout=30).json()
     pairs = [
@@ -421,85 +258,68 @@ def main():
     pairs.sort(key=lambda t: float(t["quoteVolume"]), reverse=True)
     top = pairs[:TOP_N]
 
-    btc = htf_trend("BTCUSDT")
-    recs = []
+    btc = btc_trend()
+    d = btc                                  # yon BTC trendine gore
+    sent = state["sent"]
+    hits = []
     for t in top:
         s = t["symbol"]
         try:
-            k = get_klines(s, "15m", 150)
-            if len(k) < 80:
+            k = get_klines(s, "15m", 100)
+            if len(k) < 50:
                 continue
             closes = [float(c[4]) for c in k]
-            highs = [float(c[2]) for c in k]
-            lows = [float(c[3]) for c in k]
-            vols = [float(c[7]) for c in k]
             rs = rsi_series(closes)
-            e9 = ema_series(closes, 9)
-            e21 = ema_series(closes, 21)
-            e50 = ema_series(closes, 50)
             i = len(closes) - 1
-
-            best = None
-            for d in (1, -1):
-                pts, ratio = eval_dir(d, i, closes, vols, rs, e9, e21, e50)
-                n = sum(pts.values())
-                if n >= MIN_SCORE - 1 and (best is None or n > best[1]):
-                    best = (d, n, pts, ratio)
-            if best is None:
+            kind = None
+            for j in (i, i - 1):               # son 2 mum (atlanan calismayi kacirmamak icin)
+                if rs[j] is None or rs[j - 1] is None:
+                    continue
+                if rs[j] < RSI_LOW <= rs[j - 1]:
+                    kind = "low"
+                    break
+                if rs[j] > RSI_HIGH >= rs[j - 1]:
+                    kind = "high"
+                    break
+            if kind is None:
                 continue
-            d, n, pts, ratio = best
-            if BTC_FILTER and s != "BTCUSDT" and btc in (1, -1) and d != btc:
+            skey = f"{s}|{kind}"
+            last = sent.get(skey)
+            if last and now_ms - last < COOLDOWN_MIN * 60 * 1000:
                 continue
-
-            h = htf_trend(s)
-            h_ok = (h == d)
-            total = n + (1 if h_ok else 0)
-            if total < MIN_SCORE:
-                continue
-
-            # sadece YENI olusan sinyali bildir (onceki mumda da varsa atla)
-            pts_prev, _ = eval_dir(d, i - 1, closes, vols, rs, e9, e21, e50)
-            prev_total = sum(pts_prev.values()) + (1 if h_ok else 0)
-            if prev_total >= MIN_SCORE:
-                continue
-
-            reasons = [name for name, ok in pts.items() if ok]
-            if h_ok:
-                reasons.append("1s trend")
-            lv = plan_levels(d, closes[i], highs, lows, closes)
-            if lv["stop_pct"] < MIN_STOP_PCT or lv["stop_pct"] > MAX_STOP_PCT:
-                continue
-            t0 = int(k[-1][6]) + 1
-            emoji = "🟢" if d == 1 else "🔴"
-            side = "LONG" if d == 1 else "SHORT"
-            text = (
-                f"{emoji} {s[:-4]}/USDT ({hhmm(t0)}) {side} önerisi\n"
-                f"Giriş: {fp(closes[i])} | Hedef: {fp(lv['tp'])} | Stop: {fp(lv['stop'])}\n"
-                f"Pozisyon: {lv['notional']:.0f}$ (risk {lv['risk']:.0f}$) | Skor {total}/5\n"
-                f"Neden: {', '.join(reasons)}"
-            )
-            sig = {"sym": s, "d": d, "entry": closes[i], "stop": lv["stop"],
-                   "tp": lv["tp"], "atr": lv["atr"], "t0": t0, "done": []}
-            recs.append((total, ratio, text, sig))
+            hits.append({"sym": s, "kind": kind, "rsi": rs[i], "price": closes[i],
+                         "vol": float(t["quoteVolume"]), "t0": int(k[-1][6]) + 1,
+                         "skey": skey})
         except Exception as e:
             print(s, "hata:", e)
 
     outgoing = []
-    if recs:
-        recs.sort(key=lambda x: (x[0], x[1]), reverse=True)
-        btc_txt = {1: "YUKARI", -1: "AŞAĞI", 0: "YATAY", None: "?"}[btc]
-        shown = recs[:MAX_RECS]
-        outgoing.append(f"📊 15 DK ÖNERİLER ({len(shown)} coin)\n"
-                        f"BTC 1 saatlik trend: {btc_txt}")
-        outgoing += [r[2] for r in shown]
+    if hits:
+        hits.sort(key=lambda h: h["vol"], reverse=True)
+        shown = hits[:MAX_RECS]
+        btc_txt = {1: "YUKARI", -1: "AŞAĞI", 0: "YATAY"}[btc]
+        dir_txt = {1: "LONG", -1: "SHORT", 0: "yön yok (sadece izleme)"}[btc]
+        emoji = {1: "🟢", -1: "🔴", 0: "⚪"}[btc]
+        side = {1: "LONG", -1: "SHORT", 0: "İZLE"}[btc]
+        outgoing.append(f"📊 RSI TARAMASI (15 dk, hacimli coinler)\n"
+                        f"BTC 1 saatlik trend: {btc_txt} → öneri yönü: {dir_txt}")
+        for h in shown:
+            event = "30 altına düştü" if h["kind"] == "low" else "70 üstüne çıktı"
+            outgoing.append(
+                f"{emoji} {h['sym'][:-4]}/USDT - {side}\n"
+                f"RSI {h['rsi']:.0f} ({event}) | Fiyat: {fp(h['price'])}\n"
+                f"24s hacim: {fmt_usd(h['vol'])}")
+            sent[h["skey"]] = now_ms
+            state["signals"].append({"sym": h["sym"], "d": d, "entry": h["price"],
+                                     "t0": h["t0"]})
         outgoing.append(
-            "Skor, teknik uyum sayısıdır; kazanma olasılığı değildir. "
-            "İşleme girer girmez Stop emrini borsaya gir. "
-            "Aynı yönde en fazla 1-2 işlem aç. Yatırım tavsiyesi değildir.")
-        state["signals"] += [r[3] for r in shown]
+            "Yön, BTC'nin 1 saatlik trendine göre belirlenir. "
+            f"{FOLLOW_UP_HOURS} saat sonra sonuç paylaşılacak. Yatırım tavsiyesi değildir.")
     outgoing += fu_blocks
-    if not recs and MANUAL:
-        outgoing.insert(0, f"Test başarılı. {len(top)} coin tarandı, şu an yeni öneri yok.")
+    # eski kayitlari temizle
+    state["sent"] = {k: v for k, v in sent.items() if now_ms - v < 6 * 3600 * 1000}
+    if not hits and MANUAL:
+        outgoing.insert(0, f"Test başarılı. {len(top)} coin tarandı, şu an yeni sinyal yok.")
     if outgoing:
         send_chunks(outgoing)
     save_state(state)
