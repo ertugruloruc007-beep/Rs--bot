@@ -2,12 +2,6 @@
  "version": 2,
  "signals": [
   {
-   "sym": "XAUTUSDT",
-   "d": -1,
-   "entry": 3673.51,
-   "t0": 1795104900000
-  },
-  {
    "sym": "BTCUSDT",
    "d": -1,
    "entry": 62418.01,
@@ -54,13 +48,17 @@
    "d": -1,
    "entry": 4.919,
    "t0": 1795108500000
+  },
+  {
+   "sym": "MMTUSDT",
+   "d": -1,
+   "entry": 0.2981,
+   "t0": 1795112100000
   }
  ],
  "sent": {
-  "ZECUSDT|high": 1795089096919,
-  "CRCLBUSDT|high": 1795089096919,
   "PEPEUSDT|high": 1795093165152,
-  "MMTUSDT|high": 1795101973506,
+  "MMTUSDT|high": 1795112327385,
   "SPCXBUSDT|low": 1795097926589,
   "UNIUSDT|low": 1795109262615,
   "XAUTUSDT|low": 1795105788872,
@@ -73,8 +71,8 @@
   "SOXLBUSDT|low": 1795109262615
  },
  "stats": {
-  "n": 10,
-  "win": 6,
-  "sum": -17.98319637902669
+  "n": 11,
+  "win": 7,
+  "sum": -17.887647435373335
  }
 }
