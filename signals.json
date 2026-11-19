@@ -2,12 +2,6 @@
  "version": 2,
  "signals": [
   {
-   "sym": "CRCLBUSDT",
-   "d": -1,
-   "entry": 51.82,
-   "t0": 1795122900000
-  },
-  {
    "sym": "PAXGUSDT",
    "d": -1,
    "entry": 3623.3,
@@ -16,20 +10,13 @@
  ],
  "sent": {
   "MMTUSDT|high": 1795112327385,
-  "UNIUSDT|low": 1795109262615,
-  "BTCUSDT|low": 1795109262615,
-  "ETHUSDT|low": 1795109262615,
-  "SOLUSDT|low": 1795109262615,
   "ZECUSDT|low": 1795120053849,
-  "NEARUSDT|low": 1795109262615,
-  "BNBUSDT|low": 1795109262615,
-  "SOXLBUSDT|low": 1795109262615,
   "CRCLBUSDT|low": 1795123123312,
   "PAXGUSDT|low": 1795130049184
  },
  "stats": {
-  "n": 21,
-  "win": 10,
-  "sum": -16.963036410749368
+  "n": 22,
+  "win": 11,
+  "sum": -16.538489903609268
  }
 }
