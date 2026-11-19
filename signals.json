@@ -6,13 +6,19 @@
    "d": -1,
    "entry": 55.08,
    "t0": 1795075200000
+  },
+  {
+   "sym": "CRCLBUSDT",
+   "d": -1,
+   "entry": 55.49,
+   "t0": 1795081500000
   }
  ],
  "sent": {
   "NEARUSDT|high": 1795061906490,
   "SOLUSDT|high": 1795070475121,
   "ZECUSDT|high": 1795070475121,
-  "CRCLBUSDT|high": 1795075208270
+  "CRCLBUSDT|high": 1795082286831
  },
  "stats": {
   "n": 3,
