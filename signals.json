@@ -18,13 +18,18 @@
    "d": -1,
    "entry": 55.75,
    "t0": 1795088700000
+  },
+  {
+   "sym": "PEPEUSDT",
+   "d": 0,
+   "entry": 4.02e-06,
+   "t0": 1795092300000
   }
  ],
  "sent": {
-  "SOLUSDT|high": 1795070475121,
   "ZECUSDT|high": 1795089096919,
   "CRCLBUSDT|high": 1795089096919,
-  "PEPEUSDT|high": 1795089096919
+  "PEPEUSDT|high": 1795093165152
  },
  "stats": {
   "n": 5,
