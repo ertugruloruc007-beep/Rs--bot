@@ -6,13 +6,25 @@
    "d": -1,
    "entry": 3623.3,
    "t0": 1795129200000
+  },
+  {
+   "sym": "XAUTUSDT",
+   "d": -1,
+   "entry": 3591.68,
+   "t0": 1795135500000
+  },
+  {
+   "sym": "PAXGUSDT",
+   "d": -1,
+   "entry": 3588.9,
+   "t0": 1795135500000
   }
  ],
  "sent": {
-  "MMTUSDT|high": 1795112327385,
   "ZECUSDT|low": 1795120053849,
   "CRCLBUSDT|low": 1795123123312,
-  "PAXGUSDT|low": 1795130049184
+  "PAXGUSDT|low": 1795135689478,
+  "XAUTUSDT|low": 1795135689478
  },
  "stats": {
   "n": 22,
