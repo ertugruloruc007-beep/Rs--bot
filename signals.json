@@ -12,11 +12,34 @@
    "d": -1,
    "entry": 535.64,
    "t0": 1795204800000
+  },
+  {
+   "sym": "XRPUSDT",
+   "d": -1,
+   "entry": 0.8844,
+   "t0": 1795207500000
+  },
+  {
+   "sym": "SUIUSDT",
+   "d": -1,
+   "entry": 0.6348,
+   "t0": 1795207500000
+  },
+  {
+   "sym": "QQQBUSDT",
+   "d": -1,
+   "entry": 611.26,
+   "t0": 1795207500000
+  },
+  {
+   "sym": "CRCLBUSDT",
+   "d": -1,
+   "entry": 47.72,
+   "t0": 1795207500000
   }
  ],
  "sent": {
   "NEARUSDT|low": 1795190785308,
-  "DOGEUSDT|low": 1795183921540,
   "ZECUSDT|low": 1795194494251,
   "MUBUSDT|low": 1795190785308,
   "BTCUSDT|low": 1795190785308,
@@ -24,7 +47,11 @@
   "LTCUSDT|low": 1795190785308,
   "BNBUSDT|low": 1795205432347,
   "UNIUSDT|low": 1795194494251,
-  "ETHUSDT|low": 1795205432347
+  "ETHUSDT|low": 1795205432347,
+  "XRPUSDT|low": 1795208376974,
+  "SUIUSDT|low": 1795208376974,
+  "QQQBUSDT|low": 1795208376974,
+  "CRCLBUSDT|low": 1795208376974
  },
  "stats": {
   "n": 52,
