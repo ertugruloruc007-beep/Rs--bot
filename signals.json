@@ -2,9 +2,6 @@
  "version": 2,
  "signals": [],
  "sent": {
-  "NEARUSDT|low": 1795149805698,
-  "UNIUSDT|low": 1795149805698,
-  "ZECUSDT|low": 1795149805698,
   "SPCXBUSDT|low": 1795153459718
  },
  "stats": {
