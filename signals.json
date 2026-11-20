@@ -2,18 +2,6 @@
  "version": 2,
  "signals": [
   {
-   "sym": "ETHUSDT",
-   "d": -1,
-   "entry": 1607.97,
-   "t0": 1795204800000
-  },
-  {
-   "sym": "BNBUSDT",
-   "d": -1,
-   "entry": 535.64,
-   "t0": 1795204800000
-  },
-  {
    "sym": "XRPUSDT",
    "d": -1,
    "entry": 0.8844,
@@ -39,12 +27,7 @@
   }
  ],
  "sent": {
-  "NEARUSDT|low": 1795190785308,
   "ZECUSDT|low": 1795194494251,
-  "MUBUSDT|low": 1795190785308,
-  "BTCUSDT|low": 1795190785308,
-  "HYPEUSDT|low": 1795190785308,
-  "LTCUSDT|low": 1795190785308,
   "BNBUSDT|low": 1795205432347,
   "UNIUSDT|low": 1795194494251,
   "ETHUSDT|low": 1795205432347,
@@ -54,8 +37,8 @@
   "CRCLBUSDT|low": 1795208376974
  },
  "stats": {
-  "n": 52,
+  "n": 54,
   "win": 30,
-  "sum": 13.735051483457413
+  "sum": 12.281174862907779
  }
 }
