@@ -1,6 +1,19 @@
 {
  "version": 2,
- "signals": [],
+ "signals": [
+  {
+   "sym": "ETHUSDT",
+   "d": -1,
+   "entry": 1607.97,
+   "t0": 1795204800000
+  },
+  {
+   "sym": "BNBUSDT",
+   "d": -1,
+   "entry": 535.64,
+   "t0": 1795204800000
+  }
+ ],
  "sent": {
   "NEARUSDT|low": 1795190785308,
   "DOGEUSDT|low": 1795183921540,
@@ -9,8 +22,9 @@
   "BTCUSDT|low": 1795190785308,
   "HYPEUSDT|low": 1795190785308,
   "LTCUSDT|low": 1795190785308,
-  "BNBUSDT|low": 1795194494251,
-  "UNIUSDT|low": 1795194494251
+  "BNBUSDT|low": 1795205432347,
+  "UNIUSDT|low": 1795194494251,
+  "ETHUSDT|low": 1795205432347
  },
  "stats": {
   "n": 52,
