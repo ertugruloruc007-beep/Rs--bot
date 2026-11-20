@@ -1,7 +1,23 @@
 {
  "version": 2,
- "signals": [],
- "sent": {},
+ "signals": [
+  {
+   "sym": "NEARUSDT",
+   "d": -1,
+   "entry": 2.973,
+   "t0": 1795183200000
+  },
+  {
+   "sym": "DOGEUSDT",
+   "d": -1,
+   "entry": 0.05658,
+   "t0": 1795183200000
+  }
+ ],
+ "sent": {
+  "NEARUSDT|low": 1795183921540,
+  "DOGEUSDT|low": 1795183921540
+ },
  "stats": {
   "n": 40,
   "win": 20,
