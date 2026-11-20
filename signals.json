@@ -1,9 +1,7 @@
 {
  "version": 2,
  "signals": [],
- "sent": {
-  "SPCXBUSDT|low": 1795153459718
- },
+ "sent": {},
  "stats": {
   "n": 40,
   "win": 20,
