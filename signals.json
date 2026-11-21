@@ -1,8 +1,65 @@
 {
  "version": 2,
- "signals": [],
+ "signals": [
+  {
+   "sym": "BTCUSDT",
+   "d": -1,
+   "entry": 56740.43,
+   "t0": 1795233600000
+  },
+  {
+   "sym": "ETHUSDT",
+   "d": -1,
+   "entry": 1572.29,
+   "t0": 1795233600000
+  },
+  {
+   "sym": "SOLUSDT",
+   "d": -1,
+   "entry": 66.28,
+   "t0": 1795233600000
+  },
+  {
+   "sym": "XRPUSDT",
+   "d": -1,
+   "entry": 0.8815,
+   "t0": 1795233600000
+  },
+  {
+   "sym": "DOGEUSDT",
+   "d": -1,
+   "entry": 0.05211,
+   "t0": 1795233600000
+  },
+  {
+   "sym": "PEPEUSDT",
+   "d": -1,
+   "entry": 3.27e-06,
+   "t0": 1795233600000
+  },
+  {
+   "sym": "UNIUSDT",
+   "d": -1,
+   "entry": 4.305,
+   "t0": 1795233600000
+  },
+  {
+   "sym": "ENAUSDT",
+   "d": -1,
+   "entry": 0.0927,
+   "t0": 1795233600000
+  }
+ ],
  "sent": {
-  "MMTUSDT|high": 1795223059693
+  "MMTUSDT|high": 1795223059693,
+  "BTCUSDT|low": 1795234035471,
+  "ETHUSDT|low": 1795234035471,
+  "SOLUSDT|low": 1795234035471,
+  "XRPUSDT|low": 1795234035471,
+  "DOGEUSDT|low": 1795234035471,
+  "PEPEUSDT|low": 1795234035471,
+  "UNIUSDT|low": 1795234035471,
+  "ENAUSDT|low": 1795234035471
  },
  "stats": {
   "n": 59,
