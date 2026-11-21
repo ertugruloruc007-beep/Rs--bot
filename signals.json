@@ -2,12 +2,6 @@
  "version": 2,
  "signals": [
   {
-   "sym": "LINKUSDT",
-   "d": 0,
-   "entry": 8.664,
-   "t0": 1795272300000
-  },
-  {
    "sym": "ZECUSDT",
    "d": 0,
    "entry": 789.4,
