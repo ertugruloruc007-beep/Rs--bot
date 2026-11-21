@@ -78,6 +78,12 @@
    "d": 0,
    "entry": 40.16,
    "t0": 1795269600000
+  },
+  {
+   "sym": "LINKUSDT",
+   "d": 0,
+   "entry": 8.664,
+   "t0": 1795272300000
   }
  ],
  "sent": {
@@ -87,7 +93,7 @@
   "SOLUSDT|high": 1795266570197,
   "BNBUSDT|high": 1795266570197,
   "PEPEUSDT|high": 1795266570197,
-  "LINKUSDT|high": 1795266570197,
+  "LINKUSDT|high": 1795273136595,
   "TAOUSDT|high": 1795266570197,
   "SOXLBUSDT|high": 1795270130798,
   "HYPEUSDT|high": 1795270130798,
