@@ -2,10 +2,16 @@
  "version": 2,
  "signals": [
   {
-   "sym": "ZECUSDT",
-   "d": 0,
-   "entry": 789.4,
-   "t0": 1795275000000
+   "sym": "XRPUSDT",
+   "d": -1,
+   "entry": 0.9349,
+   "t0": 1795283100000
+  },
+  {
+   "sym": "ADAUSDT",
+   "d": -1,
+   "entry": 0.1454,
+   "t0": 1795283100000
   }
  ],
  "sent": {
@@ -21,9 +27,10 @@
   "HYPEUSDT|high": 1795270130798,
   "ENAUSDT|high": 1795270130798,
   "TRXUSDT|high": 1795270130798,
-  "ADAUSDT|high": 1795270130798,
+  "ADAUSDT|high": 1795283677672,
   "MUBUSDT|high": 1795270130798,
-  "LTCUSDT|high": 1795270130798
+  "LTCUSDT|high": 1795270130798,
+  "XRPUSDT|high": 1795283677672
  },
  "stats": {
   "n": 82,
