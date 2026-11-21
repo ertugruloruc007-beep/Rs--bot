@@ -1,13 +1,22 @@
 {
  "version": 2,
- "signals": [],
+ "signals": [
+  {
+   "sym": "ZECUSDT",
+   "d": -1,
+   "entry": 761.97,
+   "t0": 1795262400000
+  },
+  {
+   "sym": "UNIUSDT",
+   "d": -1,
+   "entry": 4.513,
+   "t0": 1795262400000
+  }
+ ],
  "sent": {
-  "XRPUSDT|low": 1795241033676,
-  "DOGEUSDT|low": 1795241033676,
-  "UNIUSDT|low": 1795241033676,
-  "ENAUSDT|low": 1795241033676,
-  "ADAUSDT|low": 1795241033676,
-  "TAOUSDT|low": 1795241033676
+  "ZECUSDT|high": 1795263162281,
+  "UNIUSDT|high": 1795263162281
  },
  "stats": {
   "n": 74,
