@@ -1,13 +1,21 @@
 {
  "version": 2,
- "signals": [],
+ "signals": [
+  {
+   "sym": "MMTUSDT",
+   "d": -1,
+   "entry": 0.2738,
+   "t0": 1795222800000
+  }
+ ],
  "sent": {
   "BNBUSDT|low": 1795205432347,
   "ETHUSDT|low": 1795205432347,
   "XRPUSDT|low": 1795208376974,
   "SUIUSDT|low": 1795208376974,
   "QQQBUSDT|low": 1795208376974,
-  "CRCLBUSDT|low": 1795208376974
+  "CRCLBUSDT|low": 1795208376974,
+  "MMTUSDT|high": 1795223059693
  },
  "stats": {
   "n": 58,
