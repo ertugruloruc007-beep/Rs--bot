@@ -2,24 +2,6 @@
  "version": 2,
  "signals": [
   {
-   "sym": "ETHUSDT",
-   "d": -1,
-   "entry": 1687.33,
-   "t0": 1795338000000
-  },
-  {
-   "sym": "SOXLBUSDT",
-   "d": -1,
-   "entry": 33.46,
-   "t0": 1795338000000
-  },
-  {
-   "sym": "SUIUSDT",
-   "d": -1,
-   "entry": 0.6495,
-   "t0": 1795338000000
-  },
-  {
    "sym": "BTCUSDT",
    "d": -1,
    "entry": 60231.71,
@@ -36,20 +18,38 @@
    "d": -1,
    "entry": 61.53,
    "t0": 1795340700000
+  },
+  {
+   "sym": "BTCUSDT",
+   "d": 0,
+   "entry": 60982.81,
+   "t0": 1795346100000
+  },
+  {
+   "sym": "SOLUSDT",
+   "d": 0,
+   "entry": 70.79,
+   "t0": 1795346100000
+  },
+  {
+   "sym": "SOXLBUSDT",
+   "d": 0,
+   "entry": 34.02,
+   "t0": 1795346100000
   }
  ],
  "sent": {
-  "UNIUSDT|low": 1795324324656,
   "ETHUSDT|high": 1795338856533,
-  "SOXLBUSDT|high": 1795338856533,
+  "SOXLBUSDT|high": 1795346797989,
   "SUIUSDT|high": 1795338856533,
-  "BTCUSDT|high": 1795341543541,
+  "BTCUSDT|high": 1795346797989,
   "BNBUSDT|high": 1795341543541,
-  "HYPEUSDT|high": 1795341543541
+  "HYPEUSDT|high": 1795341543541,
+  "SOLUSDT|high": 1795346797989
  },
  "stats": {
-  "n": 93,
+  "n": 96,
   "win": 45,
-  "sum": -19.918382399237018
+  "sum": -24.52709331452378
  }
 }
