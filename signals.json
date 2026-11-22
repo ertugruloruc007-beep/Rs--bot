@@ -1,7 +1,37 @@
 {
  "version": 2,
- "signals": [],
- "sent": {},
+ "signals": [
+  {
+   "sym": "ETHUSDT",
+   "d": -1,
+   "entry": 1662.53,
+   "t0": 1795317300000
+  },
+  {
+   "sym": "ZECUSDT",
+   "d": -1,
+   "entry": 765.23,
+   "t0": 1795317300000
+  },
+  {
+   "sym": "BNBUSDT",
+   "d": -1,
+   "entry": 541.73,
+   "t0": 1795317300000
+  },
+  {
+   "sym": "SUIUSDT",
+   "d": -1,
+   "entry": 0.6365,
+   "t0": 1795317300000
+  }
+ ],
+ "sent": {
+  "ETHUSDT|low": 1795317418410,
+  "ZECUSDT|low": 1795317418410,
+  "BNBUSDT|low": 1795317418410,
+  "SUIUSDT|low": 1795317418410
+ },
  "stats": {
   "n": 84,
   "win": 39,
