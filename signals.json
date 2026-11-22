@@ -1,9 +1,7 @@
 {
  "version": 2,
  "signals": [],
- "sent": {
-  "BNBUSDT|high": 1795367608110
- },
+ "sent": {},
  "stats": {
   "n": 100,
   "win": 45,
