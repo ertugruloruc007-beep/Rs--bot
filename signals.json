@@ -1,9 +1,7 @@
 {
  "version": 2,
  "signals": [],
- "sent": {
-  "XAUTUSDT|high": 1795289393527
- },
+ "sent": {},
  "stats": {
   "n": 84,
   "win": 39,
