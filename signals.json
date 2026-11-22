@@ -24,13 +24,41 @@
    "d": -1,
    "entry": 0.6365,
    "t0": 1795317300000
+  },
+  {
+   "sym": "SOLUSDT",
+   "d": -1,
+   "entry": 69.48,
+   "t0": 1795320000000
+  },
+  {
+   "sym": "CRCLBUSDT",
+   "d": -1,
+   "entry": 48.65,
+   "t0": 1795320000000
+  },
+  {
+   "sym": "MSTRBUSDT",
+   "d": -1,
+   "entry": 80.04,
+   "t0": 1795320000000
+  },
+  {
+   "sym": "ADAUSDT",
+   "d": -1,
+   "entry": 0.1421,
+   "t0": 1795320000000
   }
  ],
  "sent": {
   "ETHUSDT|low": 1795317418410,
   "ZECUSDT|low": 1795317418410,
   "BNBUSDT|low": 1795317418410,
-  "SUIUSDT|low": 1795317418410
+  "SUIUSDT|low": 1795317418410,
+  "SOLUSDT|low": 1795320877446,
+  "CRCLBUSDT|low": 1795320877446,
+  "MSTRBUSDT|low": 1795320877446,
+  "ADAUSDT|low": 1795320877446
  },
  "stats": {
   "n": 84,
