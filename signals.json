@@ -1,9 +1,17 @@
 {
  "version": 2,
- "signals": [],
+ "signals": [
+  {
+   "sym": "ENAUSDT",
+   "d": 1,
+   "entry": 0.1001,
+   "t0": 1795468500000
+  }
+ ],
  "sent": {
   "XRPUSDT|high": 1795448780160,
-  "HYPEUSDT|high": 1795448780160
+  "HYPEUSDT|high": 1795448780160,
+  "ENAUSDT|low": 1795469041171
  },
  "stats": {
   "n": 107,
