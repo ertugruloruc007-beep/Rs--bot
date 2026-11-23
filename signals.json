@@ -1,7 +1,16 @@
 {
  "version": 2,
- "signals": [],
- "sent": {},
+ "signals": [
+  {
+   "sym": "NVDABUSDT",
+   "d": 1,
+   "entry": 135.69,
+   "t0": 1795392000000
+  }
+ ],
+ "sent": {
+  "NVDABUSDT|high": 1795392651660
+ },
  "stats": {
   "n": 100,
   "win": 45,
