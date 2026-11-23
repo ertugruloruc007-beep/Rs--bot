@@ -1,8 +1,23 @@
 {
  "version": 2,
- "signals": [],
+ "signals": [
+  {
+   "sym": "SOLUSDT",
+   "d": 1,
+   "entry": 71.98,
+   "t0": 1795412700000
+  },
+  {
+   "sym": "XRPUSDT",
+   "d": 1,
+   "entry": 0.9403,
+   "t0": 1795412700000
+  }
+ ],
  "sent": {
-  "NVDABUSDT|high": 1795392651660
+  "NVDABUSDT|high": 1795392651660,
+  "SOLUSDT|high": 1795413439160,
+  "XRPUSDT|high": 1795413439160
  },
  "stats": {
   "n": 101,
