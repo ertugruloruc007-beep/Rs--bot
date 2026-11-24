@@ -7,7 +7,7 @@ import requests
 
 TOKEN = os.environ["TELEGRAM_TOKEN"]
 CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
-MANUAL = os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch"
+MANUAL = os.environ.get("MANUAL_RUN") == "true"   # sadece elle "Run workflow" ile calistirinca
 
 BASE = "https://data-api.binance.vision/api/v3"
 
@@ -17,6 +17,8 @@ RSI_HIGH = 70                # RSI bunun ustune cikinca sinyal
 TOP_N = 100                  # 24s hacmine gore en buyuk kac coin taransin
 MIN_VOL_24H = 20_000_000     # 24s hacmi (USDT) bunun altindaki coinler taranmaz
 MAX_RECS = 8                 # bir mesajda en fazla kac coin onerilsin
+LIVE_CANDLE = True           # True: mum kapanmadan, canli RSI ile uyar (daha erken, mum kapanisinda degisebilir)
+STALE_MARGIN = 5             # RSI bu kadar puan geri donduyse eski sinyal gosterilmez
 COOLDOWN_MIN = 60            # ayni coin/sinyal icin tekrar uyari beklemesi (dakika)
 FOLLOW_UP_HOURS = 2          # kac saat sonra sonuc notu gonderilsin
 STATE_FILE = "signals.json"
@@ -126,13 +128,13 @@ def hhmm(ms):
     return datetime.fromtimestamp(ms / 1000, tz).strftime("%H:%M")
 
 
-def get_klines(symbol, interval, limit):
+def get_klines(symbol, interval, limit, drop_open=True):
     k = requests.get(
         BASE + "/klines",
         params={"symbol": symbol, "interval": interval, "limit": limit},
         timeout=20,
     ).json()
-    return k[:-1]  # son (acik) mumu atla
+    return k[:-1] if drop_open else k   # drop_open: son (acik) mumu atla
 
 
 def btc_trend():
@@ -172,7 +174,7 @@ def save_state(st):
 
 
 def follow_up(state, now_ms):
-    """2 saati dolan onerilerin sonucunu hesaplar, mesaj bloklari dondurur."""
+    """Uyariden 2 saat sonra sonucu hesaplar, mesaj bloklari dondurur."""
     items = []
     gains = []
     keep = []
@@ -183,20 +185,21 @@ def follow_up(state, now_ms):
             continue
         if now_ms > end_ms + 6 * 3600 * 1000:      # cok gec kalmis, vazgec
             continue
-        n_c = 4 * FOLLOW_UP_HOURS
+        start = -(-sig["t0"] // 900000) * 900000   # uyaridan sonraki ilk 15dk mum baslangici
         try:
             k = requests.get(
                 BASE + "/klines",
                 params={"symbol": sig["sym"], "interval": "15m",
-                        "startTime": sig["t0"], "limit": n_c},
+                        "startTime": start, "limit": 10},
                 timeout=20,
             ).json()
-            k = [c for c in k if c[6] < now_ms]    # sadece kapanmis mumlar
-            if len(k) < n_c:
+            k = [c for c in k if c[6] <= end_ms and c[6] < now_ms]   # kapanmis ve 2 saat icinde
+            if len(k) < 6:
                 keep.append(sig)
                 continue
             entry, d = sig["entry"], sig["d"]
             final = float(k[-1][4])
+            end_label = hhmm(int(k[-1][6]) + 1)
             hi = max(float(c[2]) for c in k)
             lo = min(float(c[3]) for c in k)
             chg = (final / entry - 1) * 100
@@ -217,7 +220,7 @@ def follow_up(state, now_ms):
                 result = "Yön önerilmediği için kâr/zarar hesaplanmadı"
             items.append(
                 f"{head}\n"
-                f"{fp(entry)} → {fp(final)} ({hhmm(end_ms)})\n"
+                f"{fp(entry)} → {fp(final)} ({end_label})\n"
                 f"Fiyat 2 saatte {pct(chg, 2)} {'yükseldi' if chg > 0 else 'düştü'}\n"
                 f"2 saat içinde en yüksek {pct(up)}, en düşük {pct(down)}\n"
                 f"{result}"
@@ -239,7 +242,7 @@ def follow_up(state, now_ms):
                 f"Ortalama: {col(sum(gains) / len(gains))} {pct(sum(gains) / len(gains), 2)}\n"
                 f"Genel: {st['n']} öneri, %{st['win'] / st['n'] * 100:.0f} kazandırdı, "
                 f"ortalama {col(st['sum'] / st['n'])} {pct(st['sum'] / st['n'], 2)}")
-        blocks.append("Yüzdeler fiyat değişimidir (kaldıraçsız); komisyon dahil değil.")
+        blocks.append("Fiyat, uyarı anındaki fiyattan hesaplanır. Yüzdeler kaldıraçsızdır; komisyon dahil değil.")
     return blocks
 
 
@@ -265,7 +268,7 @@ def main():
     for t in top:
         s = t["symbol"]
         try:
-            k = get_klines(s, "15m", 100)
+            k = get_klines(s, "15m", 100, drop_open=not LIVE_CANDLE)
             if len(k) < 50:
                 continue
             closes = [float(c[4]) for c in k]
@@ -283,13 +286,18 @@ def main():
                     break
             if kind is None:
                 continue
+            # RSI sinyalden sonra geri donduyse (eski sinyal) gosterme
+            if kind == "low" and rs[i] >= RSI_LOW + STALE_MARGIN:
+                continue
+            if kind == "high" and rs[i] <= RSI_HIGH - STALE_MARGIN:
+                continue
             skey = f"{s}|{kind}"
             last = sent.get(skey)
             if last and now_ms - last < COOLDOWN_MIN * 60 * 1000:
                 continue
-            hits.append({"sym": s, "kind": kind, "rsi": rs[i], "price": closes[i],
-                         "vol": float(t["quoteVolume"]), "t0": int(k[-1][6]) + 1,
-                         "skey": skey})
+            hits.append({"sym": s, "kind": kind, "rsi": rs[i], "price": float(t["lastPrice"]),
+                         "vol": float(t["quoteVolume"]), "open_ms": int(k[j][0]),
+                         "live": LIVE_CANDLE and j == i, "skey": skey})
         except Exception as e:
             print(s, "hata:", e)
 
@@ -305,13 +313,14 @@ def main():
                         f"BTC 1 saatlik trend: {btc_txt} → öneri yönü: {dir_txt}")
         for h in shown:
             event = "30 altına düştü" if h["kind"] == "low" else "70 üstüne çıktı"
+            live_txt = " ⚡ canlı, mum henüz kapanmadı" if h["live"] else ""
             outgoing.append(
                 f"{emoji} {h['sym'][:-4]}/USDT - {side}\n"
-                f"RSI {h['rsi']:.0f} ({event}) | Fiyat: {fp(h['price'])}\n"
-                f"24s hacim: {fmt_usd(h['vol'])}")
+                f"RSI şu an {h['rsi']:.0f} | {hhmm(h['open_ms'])} mumunda {event}{live_txt}\n"
+                f"Fiyat: {fp(h['price'])} | 24s hacim: {fmt_usd(h['vol'])}")
             sent[h["skey"]] = now_ms
             state["signals"].append({"sym": h["sym"], "d": d, "entry": h["price"],
-                                     "t0": h["t0"]})
+                                     "t0": now_ms})
         outgoing.append(
             "Yön, BTC'nin 1 saatlik trendine göre belirlenir. "
             f"{FOLLOW_UP_HOURS} saat sonra sonuç paylaşılacak. Yatırım tavsiyesi değildir.")
