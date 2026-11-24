@@ -36,17 +36,39 @@
    "d": -1,
    "entry": 6.128,
    "t0": 1795511700000
+  },
+  {
+   "sym": "SOXLBUSDT",
+   "d": -1,
+   "entry": 39.38,
+   "t0": 1795515300000
+  },
+  {
+   "sym": "MUBUSDT",
+   "d": -1,
+   "entry": 672.85,
+   "t0": 1795515300000
+  },
+  {
+   "sym": "SOXSBUSDT",
+   "d": -1,
+   "entry": 53.56,
+   "t0": 1795515300000
+  },
+  {
+   "sym": "SPCXBUSDT",
+   "d": -1,
+   "entry": 132.43,
+   "t0": 1795515300000
   }
  ],
  "sent": {
-  "NEARUSDT|low": 1795491511609,
-  "HYPEUSDT|low": 1795491511609,
   "INJUSDT|low": 1795511933621,
   "NVDABUSDT|low": 1795511933621,
-  "SOXLBUSDT|low": 1795511933621,
-  "MUBUSDT|low": 1795511933621,
-  "SOXSBUSDT|high": 1795511933621,
-  "SPCXBUSDT|low": 1795511933621
+  "SOXLBUSDT|low": 1795516095442,
+  "MUBUSDT|low": 1795516095442,
+  "SOXSBUSDT|high": 1795516095442,
+  "SPCXBUSDT|low": 1795516095442
  },
  "stats": {
   "n": 109,
