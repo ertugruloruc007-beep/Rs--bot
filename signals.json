@@ -1,10 +1,18 @@
 {
  "version": 2,
- "signals": [],
+ "signals": [
+  {
+   "sym": "HYPEUSDT",
+   "d": -1,
+   "entry": 60.12,
+   "t0": 1795549511949
+  }
+ ],
  "sent": {
   "ZECUSDT|low": 1795528028196,
   "XRPUSDT|low": 1795535214641,
-  "ADAUSDT|low": 1795535214641
+  "ADAUSDT|low": 1795535214641,
+  "HYPEUSDT|low": 1795549511949
  },
  "stats": {
   "n": 126,
