@@ -1,25 +1,6 @@
 {
  "version": 2,
- "signals": [
-  {
-   "sym": "NEARUSDT",
-   "d": 0,
-   "entry": 2.932,
-   "t0": 1795491000000
-  },
-  {
-   "sym": "HYPEUSDT",
-   "d": 0,
-   "entry": 62.89,
-   "t0": 1795491000000
-  },
-  {
-   "sym": "INJUSDT",
-   "d": 0,
-   "entry": 6.169,
-   "t0": 1795491000000
-  }
- ],
+ "signals": [],
  "sent": {
   "NEARUSDT|low": 1795491511609,
   "HYPEUSDT|low": 1795491511609,
