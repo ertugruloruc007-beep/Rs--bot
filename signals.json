@@ -42,6 +42,36 @@
    "d": -1,
    "entry": 3474.47,
    "t0": 1795614333933
+  },
+  {
+   "sym": "BTCUSDT",
+   "d": -1,
+   "entry": 58062.31,
+   "t0": 1795615259865
+  },
+  {
+   "sym": "SOLUSDT",
+   "d": -1,
+   "entry": 66.8,
+   "t0": 1795615259865
+  },
+  {
+   "sym": "HYPEUSDT",
+   "d": -1,
+   "entry": 56.96,
+   "t0": 1795615259865
+  },
+  {
+   "sym": "NVDABUSDT",
+   "d": -1,
+   "entry": 145.42,
+   "t0": 1795615259865
+  },
+  {
+   "sym": "BNBUSDT",
+   "d": -1,
+   "entry": 533.02,
+   "t0": 1795615259865
   }
  ],
  "sent": {
@@ -49,14 +79,16 @@
   "SOXLBUSDT|low": 1795600326164,
   "SOXSBUSDT|high": 1795600236333,
   "SPCXBUSDT|low": 1795613450694,
-  "SOLUSDT|low": 1795598140293,
-  "NVDABUSDT|low": 1795599049047,
+  "SOLUSDT|low": 1795615259865,
+  "NVDABUSDT|low": 1795615259865,
   "DOGEUSDT|low": 1795614333933,
-  "HYPEUSDT|low": 1795600326164,
+  "HYPEUSDT|low": 1795615259865,
   "ZECUSDT|low": 1795611660062,
   "PEPEUSDT|low": 1795611960195,
   "XRPUSDT|low": 1795614333933,
-  "XAUTUSDT|low": 1795614333933
+  "XAUTUSDT|low": 1795614333933,
+  "BTCUSDT|low": 1795615259865,
+  "BNBUSDT|low": 1795615259865
  },
  "stats": {
   "n": 150,
