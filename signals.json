@@ -90,6 +90,12 @@
    "d": 0,
    "entry": 2.916,
    "t0": 1795634443580
+  },
+  {
+   "sym": "BNBUSDT",
+   "d": 0,
+   "entry": 553.74,
+   "t0": 1795634739252
   }
  ],
  "sent": {
@@ -121,7 +127,8 @@
   "XAUTUSDT|high": 1795633837813,
   "SOXSBUSDT|low": 1795633837813,
   "PAXGUSDT|high": 1795633837813,
-  "NEARUSDT|high": 1795634443580
+  "NEARUSDT|high": 1795634443580,
+  "BNBUSDT|high": 1795634739252
  },
  "stats": {
   "n": 172,
