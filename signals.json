@@ -42,12 +42,18 @@
    "d": -1,
    "entry": 1644.09,
    "t0": 1795592734404
+  },
+  {
+   "sym": "UNIUSDT",
+   "d": -1,
+   "entry": 4.535,
+   "t0": 1795597257381
   }
  ],
  "sent": {
   "ETHUSDT|low": 1795592734404,
   "BNBUSDT|low": 1795582236816,
-  "UNIUSDT|low": 1795592438218,
+  "UNIUSDT|low": 1795597257381,
   "SOXLBUSDT|low": 1795591234160,
   "PEPEUSDT|high": 1795587333302,
   "SOXSBUSDT|high": 1795591234160,
