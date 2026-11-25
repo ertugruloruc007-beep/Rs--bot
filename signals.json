@@ -2,12 +2,6 @@
  "version": 2,
  "signals": [
   {
-   "sym": "UNIUSDT",
-   "d": 0,
-   "entry": 4.704,
-   "t0": 1795634135161
-  },
-  {
    "sym": "SOLUSDT",
    "d": 0,
    "entry": 70.66,
