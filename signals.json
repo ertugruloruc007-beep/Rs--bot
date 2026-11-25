@@ -48,6 +48,12 @@
    "d": -1,
    "entry": 4.535,
    "t0": 1795597257381
+  },
+  {
+   "sym": "SOLUSDT",
+   "d": -1,
+   "entry": 67.6,
+   "t0": 1795598140293
   }
  ],
  "sent": {
@@ -58,7 +64,7 @@
   "PEPEUSDT|high": 1795587333302,
   "SOXSBUSDT|high": 1795591234160,
   "SPCXBUSDT|low": 1795591528989,
-  "SOLUSDT|low": 1795592438218,
+  "SOLUSDT|low": 1795598140293,
   "NVDABUSDT|low": 1795592438218
  },
  "stats": {
