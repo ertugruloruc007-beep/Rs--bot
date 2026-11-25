@@ -114,6 +114,18 @@
    "d": 0,
    "entry": 0.05596,
    "t0": 1795640466850
+  },
+  {
+   "sym": "XRPUSDT",
+   "d": 0,
+   "entry": 0.9483,
+   "t0": 1795640729787
+  },
+  {
+   "sym": "SPCXBUSDT",
+   "d": 0,
+   "entry": 128.21,
+   "t0": 1795640729787
   }
  ],
  "sent": {
@@ -125,8 +137,8 @@
   "SOLUSDT|high": 1795634443580,
   "ZECUSDT|high": 1795630642530,
   "SUIUSDT|high": 1795640128824,
-  "XRPUSDT|high": 1795633529262,
-  "SPCXBUSDT|high": 1795633529262,
+  "XRPUSDT|high": 1795640729787,
+  "SPCXBUSDT|high": 1795640729787,
   "DOGEUSDT|high": 1795640466850,
   "SOXLBUSDT|high": 1795633837813,
   "XAUTUSDT|high": 1795637736402,
