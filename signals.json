@@ -2,24 +2,6 @@
  "version": 2,
  "signals": [
   {
-   "sym": "XAUTUSDT",
-   "d": 0,
-   "entry": 3566.28,
-   "t0": 1795637736402
-  },
-  {
-   "sym": "UNIUSDT",
-   "d": 0,
-   "entry": 4.744,
-   "t0": 1795637736402
-  },
-  {
-   "sym": "PAXGUSDT",
-   "d": 0,
-   "entry": 3566.51,
-   "t0": 1795637736402
-  },
-  {
    "sym": "NEARUSDT",
    "d": 0,
    "entry": 3.005,
