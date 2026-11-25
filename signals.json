@@ -72,6 +72,12 @@
    "d": 0,
    "entry": 3554.15,
    "t0": 1795633837813
+  },
+  {
+   "sym": "UNIUSDT",
+   "d": 0,
+   "entry": 4.704,
+   "t0": 1795634135161
   }
  ],
  "sent": {
@@ -92,7 +98,7 @@
   "ETHUSDT|low": 1795617933781,
   "TRXUSDT|low": 1795624249664,
   "HYPEUSDT|high": 1795629929571,
-  "UNIUSDT|high": 1795630241476,
+  "UNIUSDT|high": 1795634135161,
   "SOLUSDT|high": 1795630642530,
   "ZECUSDT|high": 1795630642530,
   "SUIUSDT|high": 1795632634873,
