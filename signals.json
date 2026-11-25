@@ -78,12 +78,30 @@
    "d": -1,
    "entry": 575.89,
    "t0": 1795616984897
+  },
+  {
+   "sym": "SOXLBUSDT",
+   "d": -1,
+   "entry": 25.32,
+   "t0": 1795617328511
+  },
+  {
+   "sym": "WBTCUSDT",
+   "d": -1,
+   "entry": 57842.89,
+   "t0": 1795617328511
+  },
+  {
+   "sym": "SOXSBUSDT",
+   "d": -1,
+   "entry": 74.97,
+   "t0": 1795617328511
   }
  ],
  "sent": {
   "UNIUSDT|low": 1795597257381,
-  "SOXLBUSDT|low": 1795600326164,
-  "SOXSBUSDT|high": 1795600236333,
+  "SOXLBUSDT|low": 1795617328511,
+  "SOXSBUSDT|high": 1795617328511,
   "SPCXBUSDT|low": 1795613450694,
   "SOLUSDT|low": 1795615259865,
   "NVDABUSDT|low": 1795615259865,
@@ -96,7 +114,8 @@
   "BTCUSDT|low": 1795615259865,
   "BNBUSDT|low": 1795615259865,
   "NEARUSDT|low": 1795615529313,
-  "MUBUSDT|low": 1795616984897
+  "MUBUSDT|low": 1795616984897,
+  "WBTCUSDT|low": 1795617328511
  },
  "stats": {
   "n": 151,
