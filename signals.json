@@ -1,19 +1,6 @@
 {
  "version": 2,
- "signals": [
-  {
-   "sym": "XRPUSDT",
-   "d": 0,
-   "entry": 0.9483,
-   "t0": 1795640729787
-  },
-  {
-   "sym": "SPCXBUSDT",
-   "d": 0,
-   "entry": 128.21,
-   "t0": 1795640729787
-  }
- ],
+ "signals": [],
  "sent": {
   "HYPEUSDT|high": 1795640466850,
   "UNIUSDT|high": 1795637736402,
