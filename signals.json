@@ -96,6 +96,12 @@
    "d": 0,
    "entry": 553.74,
    "t0": 1795634739252
+  },
+  {
+   "sym": "HYPEUSDT",
+   "d": 0,
+   "entry": 61.39,
+   "t0": 1795636537468
   }
  ],
  "sent": {
@@ -113,7 +119,7 @@
   "WBTCUSDT|low": 1795617328511,
   "ETHUSDT|low": 1795617933781,
   "TRXUSDT|low": 1795624249664,
-  "HYPEUSDT|high": 1795629929571,
+  "HYPEUSDT|high": 1795636537468,
   "UNIUSDT|high": 1795634135161,
   "SOLUSDT|high": 1795634443580,
   "ZECUSDT|high": 1795630642530,
