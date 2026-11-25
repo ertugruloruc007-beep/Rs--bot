@@ -2,12 +2,6 @@
  "version": 2,
  "signals": [
   {
-   "sym": "NEARUSDT",
-   "d": 0,
-   "entry": 3.005,
-   "t0": 1795638128842
-  },
-  {
    "sym": "SUIUSDT",
    "d": 0,
    "entry": 0.664,
