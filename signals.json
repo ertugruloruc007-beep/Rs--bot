@@ -24,17 +24,37 @@
    "d": -1,
    "entry": 123.43,
    "t0": 1795591528989
+  },
+  {
+   "sym": "SOLUSDT",
+   "d": -1,
+   "entry": 67.98,
+   "t0": 1795592438218
+  },
+  {
+   "sym": "NVDABUSDT",
+   "d": -1,
+   "entry": 148.49,
+   "t0": 1795592438218
+  },
+  {
+   "sym": "UNIUSDT",
+   "d": -1,
+   "entry": 4.538,
+   "t0": 1795592438218
   }
  ],
  "sent": {
   "HYPEUSDT|low": 1795571522314,
   "ETHUSDT|low": 1795571522314,
   "BNBUSDT|low": 1795582236816,
-  "UNIUSDT|low": 1795571522314,
+  "UNIUSDT|low": 1795592438218,
   "SOXLBUSDT|low": 1795591234160,
   "PEPEUSDT|high": 1795587333302,
   "SOXSBUSDT|high": 1795591234160,
-  "SPCXBUSDT|low": 1795591528989
+  "SPCXBUSDT|low": 1795591528989,
+  "SOLUSDT|low": 1795592438218,
+  "NVDABUSDT|low": 1795592438218
  },
  "stats": {
   "n": 134,
