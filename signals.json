@@ -2,12 +2,6 @@
  "version": 2,
  "signals": [
   {
-   "sym": "SUIUSDT",
-   "d": 0,
-   "entry": 0.664,
-   "t0": 1795640128824
-  },
-  {
    "sym": "HYPEUSDT",
    "d": 0,
    "entry": 61.94,
