@@ -1,6 +1,13 @@
 {
  "version": 2,
- "signals": [],
+ "signals": [
+  {
+   "sym": "DOGEUSDT",
+   "d": -1,
+   "entry": 0.0536,
+   "t0": 1795608066577
+  }
+ ],
  "sent": {
   "ETHUSDT|low": 1795592734404,
   "UNIUSDT|low": 1795597257381,
@@ -10,7 +17,7 @@
   "SPCXBUSDT|low": 1795600236333,
   "SOLUSDT|low": 1795598140293,
   "NVDABUSDT|low": 1795599049047,
-  "DOGEUSDT|low": 1795599049047,
+  "DOGEUSDT|low": 1795608066577,
   "HYPEUSDT|low": 1795600326164
  },
  "stats": {
