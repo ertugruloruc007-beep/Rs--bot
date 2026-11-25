@@ -2,18 +2,6 @@
  "version": 2,
  "signals": [
   {
-   "sym": "SOLUSDT",
-   "d": 0,
-   "entry": 70.66,
-   "t0": 1795634443580
-  },
-  {
-   "sym": "NEARUSDT",
-   "d": 0,
-   "entry": 2.916,
-   "t0": 1795634443580
-  },
-  {
    "sym": "BNBUSDT",
    "d": 0,
    "entry": 553.74,
@@ -81,7 +69,6 @@
   }
  ],
  "sent": {
-  "XAUTUSDT|low": 1795620043434,
   "MUBUSDT|low": 1795624538087,
   "TRXUSDT|low": 1795624249664,
   "HYPEUSDT|high": 1795640466850,
