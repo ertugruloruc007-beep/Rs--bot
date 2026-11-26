@@ -66,12 +66,24 @@
    "d": 0,
    "entry": 4.791,
    "t0": 1795652135234
+  },
+  {
+   "sym": "SOLUSDT",
+   "d": 0,
+   "entry": 71.66,
+   "t0": 1795652201223
+  },
+  {
+   "sym": "MUBUSDT",
+   "d": 0,
+   "entry": 611.4,
+   "t0": 1795652201223
   }
  ],
  "sent": {
   "HYPEUSDT|high": 1795652135234,
   "UNIUSDT|high": 1795652135234,
-  "SOLUSDT|high": 1795634443580,
+  "SOLUSDT|high": 1795652201223,
   "ZECUSDT|high": 1795651833631,
   "SUIUSDT|high": 1795650927289,
   "XRPUSDT|high": 1795640729787,
@@ -86,7 +98,8 @@
   "MMTUSDT|high": 1795648534664,
   "BTCUSDT|high": 1795652135234,
   "ETHUSDT|high": 1795652135234,
-  "WBTCUSDT|high": 1795652135234
+  "WBTCUSDT|high": 1795652135234,
+  "MUBUSDT|high": 1795652201223
  },
  "stats": {
   "n": 177,
