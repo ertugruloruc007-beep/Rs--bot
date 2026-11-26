@@ -18,6 +18,12 @@
    "d": 1,
    "entry": 684.0,
    "t0": 1795734640572
+  },
+  {
+   "sym": "PEPEUSDT",
+   "d": 1,
+   "entry": 3.45e-06,
+   "t0": 1795734938649
   }
  ],
  "sent": {
@@ -25,7 +31,8 @@
   "HYPEUSDT|high": 1795721448326,
   "SOXLBUSDT|high": 1795728047308,
   "BNBUSDT|high": 1795729834780,
-  "ZECUSDT|low": 1795734640572
+  "ZECUSDT|low": 1795734640572,
+  "PEPEUSDT|low": 1795734938649
  },
  "stats": {
   "n": 201,
