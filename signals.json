@@ -120,6 +120,12 @@
    "d": 0,
    "entry": 152.61,
    "t0": 1795656329197
+  },
+  {
+   "sym": "XRPUSDT",
+   "d": 0,
+   "entry": 0.9523,
+   "t0": 1795658128329
   }
  ],
  "sent": {
@@ -128,7 +134,7 @@
   "SOLUSDT|high": 1795652201223,
   "ZECUSDT|high": 1795651833631,
   "SUIUSDT|high": 1795655742225,
-  "XRPUSDT|high": 1795640729787,
+  "XRPUSDT|high": 1795658128329,
   "SPCXBUSDT|high": 1795652435505,
   "DOGEUSDT|high": 1795655435288,
   "SOXLBUSDT|high": 1795656329197,
