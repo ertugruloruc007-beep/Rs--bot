@@ -18,13 +18,48 @@
    "d": 1,
    "entry": 4.655,
    "t0": 1795704927800
+  },
+  {
+   "sym": "ETHUSDT",
+   "d": 1,
+   "entry": 1682.44,
+   "t0": 1795705529026
+  },
+  {
+   "sym": "NEARUSDT",
+   "d": 1,
+   "entry": 2.996,
+   "t0": 1795705529026
+  },
+  {
+   "sym": "BNBUSDT",
+   "d": 1,
+   "entry": 548.19,
+   "t0": 1795705529026
+  },
+  {
+   "sym": "PEPEUSDT",
+   "d": 1,
+   "entry": 3.42e-06,
+   "t0": 1795705529026
+  },
+  {
+   "sym": "SUIUSDT",
+   "d": 1,
+   "entry": 0.6555,
+   "t0": 1795705529026
   }
  ],
  "sent": {
   "MMTUSDT|low": 1795697434912,
   "ZECUSDT|low": 1795704042802,
   "SPCXBUSDT|high": 1795697137693,
-  "UNIUSDT|low": 1795704927800
+  "UNIUSDT|low": 1795704927800,
+  "ETHUSDT|low": 1795705529026,
+  "NEARUSDT|low": 1795705529026,
+  "BNBUSDT|low": 1795705529026,
+  "PEPEUSDT|low": 1795705529026,
+  "SUIUSDT|low": 1795705529026
  },
  "stats": {
   "n": 187,
