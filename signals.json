@@ -2,12 +2,6 @@
  "version": 2,
  "signals": [
   {
-   "sym": "SUIUSDT",
-   "d": 0,
-   "entry": 0.6681,
-   "t0": 1795650927289
-  },
-  {
    "sym": "ZECUSDT",
    "d": 0,
    "entry": 775.25,
