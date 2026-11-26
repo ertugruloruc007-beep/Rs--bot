@@ -12,13 +12,20 @@
    "d": 1,
    "entry": 557.49,
    "t0": 1795729834780
+  },
+  {
+   "sym": "ZECUSDT",
+   "d": 1,
+   "entry": 684.0,
+   "t0": 1795734640572
   }
  ],
  "sent": {
   "UNIUSDT|low": 1795713343540,
   "HYPEUSDT|high": 1795721448326,
   "SOXLBUSDT|high": 1795728047308,
-  "BNBUSDT|high": 1795729834780
+  "BNBUSDT|high": 1795729834780,
+  "ZECUSDT|low": 1795734640572
  },
  "stats": {
   "n": 201,
