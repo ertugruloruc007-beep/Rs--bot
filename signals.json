@@ -2,12 +2,6 @@
  "version": 2,
  "signals": [
   {
-   "sym": "PEPEUSDT",
-   "d": 0,
-   "entry": 3.57e-06,
-   "t0": 1795659035803
-  },
-  {
    "sym": "MUBUSDT",
    "d": 0,
    "entry": 621.53,
