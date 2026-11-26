@@ -2,18 +2,6 @@
  "version": 2,
  "signals": [
   {
-   "sym": "SOXLBUSDT",
-   "d": 0,
-   "entry": 33.32,
-   "t0": 1795652726385
-  },
-  {
-   "sym": "NVDABUSDT",
-   "d": 0,
-   "entry": 152.03,
-   "t0": 1795652726385
-  },
-  {
    "sym": "DOGEUSDT",
    "d": 0,
    "entry": 0.05653,
