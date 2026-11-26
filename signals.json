@@ -2,12 +2,6 @@
  "version": 2,
  "signals": [
   {
-   "sym": "ADAUSDT",
-   "d": 0,
-   "entry": 0.1485,
-   "t0": 1795663850990
-  },
-  {
    "sym": "XRPUSDT",
    "d": 1,
    "entry": 0.9607,
@@ -24,6 +18,12 @@
    "d": 1,
    "entry": 0.1494,
    "t0": 1795667730645
+  },
+  {
+   "sym": "XRPUSDT",
+   "d": 1,
+   "entry": 0.9638,
+   "t0": 1795671328515
   }
  ],
  "sent": {
@@ -32,7 +32,7 @@
   "SOLUSDT|high": 1795652201223,
   "ZECUSDT|high": 1795651833631,
   "SUIUSDT|high": 1795655742225,
-  "XRPUSDT|high": 1795666836600,
+  "XRPUSDT|high": 1795671328515,
   "SPCXBUSDT|high": 1795652435505,
   "DOGEUSDT|high": 1795662943795,
   "SOXLBUSDT|high": 1795656329197,
