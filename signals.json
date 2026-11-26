@@ -2,12 +2,6 @@
  "version": 2,
  "signals": [
   {
-   "sym": "DOGEUSDT",
-   "d": 0,
-   "entry": 0.05653,
-   "t0": 1795655435288
-  },
-  {
    "sym": "NEARUSDT",
    "d": 0,
    "entry": 3.103,
@@ -48,6 +42,18 @@
    "d": 0,
    "entry": 621.53,
    "t0": 1795659637050
+  },
+  {
+   "sym": "XRPUSDT",
+   "d": 0,
+   "entry": 0.9585,
+   "t0": 1795662943795
+  },
+  {
+   "sym": "DOGEUSDT",
+   "d": 0,
+   "entry": 0.05687,
+   "t0": 1795662943795
   }
  ],
  "sent": {
@@ -56,9 +62,9 @@
   "SOLUSDT|high": 1795652201223,
   "ZECUSDT|high": 1795651833631,
   "SUIUSDT|high": 1795655742225,
-  "XRPUSDT|high": 1795658128329,
+  "XRPUSDT|high": 1795662943795,
   "SPCXBUSDT|high": 1795652435505,
-  "DOGEUSDT|high": 1795655435288,
+  "DOGEUSDT|high": 1795662943795,
   "SOXLBUSDT|high": 1795656329197,
   "NEARUSDT|high": 1795655742225,
   "BNBUSDT|high": 1795652135234,
