@@ -24,6 +24,12 @@
    "d": 1,
    "entry": 0.9638,
    "t0": 1795671328515
+  },
+  {
+   "sym": "ADAUSDT",
+   "d": 1,
+   "entry": 0.1494,
+   "t0": 1795671636477
   }
  ],
  "sent": {
@@ -44,7 +50,7 @@
   "MUBUSDT|high": 1795659637050,
   "NVDABUSDT|high": 1795656329197,
   "PEPEUSDT|high": 1795659035803,
-  "ADAUSDT|high": 1795667730645,
+  "ADAUSDT|high": 1795671636477,
   "MMTUSDT|low": 1795666836600
  },
  "stats": {
