@@ -1,6 +1,13 @@
 {
  "version": 2,
- "signals": [],
+ "signals": [
+  {
+   "sym": "HYPEUSDT",
+   "d": 1,
+   "entry": 62.25,
+   "t0": 1795721448326
+  }
+ ],
  "sent": {
   "MMTUSDT|low": 1795707639899,
   "ZECUSDT|low": 1795704042802,
@@ -12,7 +19,8 @@
   "SUIUSDT|low": 1795705529026,
   "XRPUSDT|low": 1795705833511,
   "HYPEUSDT|low": 1795705833511,
-  "TRXUSDT|low": 1795706727985
+  "TRXUSDT|low": 1795706727985,
+  "HYPEUSDT|high": 1795721448326
  },
  "stats": {
   "n": 200,
