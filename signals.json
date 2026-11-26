@@ -2,18 +2,6 @@
  "version": 2,
  "signals": [
   {
-   "sym": "XRPUSDT",
-   "d": 0,
-   "entry": 0.9585,
-   "t0": 1795662943795
-  },
-  {
-   "sym": "DOGEUSDT",
-   "d": 0,
-   "entry": 0.05687,
-   "t0": 1795662943795
-  },
-  {
    "sym": "ADAUSDT",
    "d": 0,
    "entry": 0.1485,
