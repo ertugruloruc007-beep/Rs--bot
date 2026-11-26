@@ -84,6 +84,18 @@
    "d": 0,
    "entry": 128.84,
    "t0": 1795652435505
+  },
+  {
+   "sym": "SOXLBUSDT",
+   "d": 0,
+   "entry": 33.32,
+   "t0": 1795652726385
+  },
+  {
+   "sym": "NVDABUSDT",
+   "d": 0,
+   "entry": 152.03,
+   "t0": 1795652726385
   }
  ],
  "sent": {
@@ -95,7 +107,7 @@
   "XRPUSDT|high": 1795640729787,
   "SPCXBUSDT|high": 1795652435505,
   "DOGEUSDT|high": 1795651833631,
-  "SOXLBUSDT|high": 1795633837813,
+  "SOXLBUSDT|high": 1795652726385,
   "XAUTUSDT|high": 1795637736402,
   "SOXSBUSDT|low": 1795633837813,
   "PAXGUSDT|high": 1795637736402,
@@ -105,7 +117,8 @@
   "BTCUSDT|high": 1795652135234,
   "ETHUSDT|high": 1795652135234,
   "WBTCUSDT|high": 1795652135234,
-  "MUBUSDT|high": 1795652201223
+  "MUBUSDT|high": 1795652201223,
+  "NVDABUSDT|high": 1795652726385
  },
  "stats": {
   "n": 177,
