@@ -6,13 +6,20 @@
    "d": 1,
    "entry": 62.25,
    "t0": 1795721448326
+  },
+  {
+   "sym": "SOXLBUSDT",
+   "d": 1,
+   "entry": 34.32,
+   "t0": 1795728047308
   }
  ],
  "sent": {
   "MMTUSDT|low": 1795707639899,
   "UNIUSDT|low": 1795713343540,
   "TRXUSDT|low": 1795706727985,
-  "HYPEUSDT|high": 1795721448326
+  "HYPEUSDT|high": 1795721448326,
+  "SOXLBUSDT|high": 1795728047308
  },
  "stats": {
   "n": 200,
