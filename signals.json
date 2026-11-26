@@ -120,6 +120,12 @@
    "d": 0,
    "entry": 0.9523,
    "t0": 1795658128329
+  },
+  {
+   "sym": "PEPEUSDT",
+   "d": 0,
+   "entry": 3.57e-06,
+   "t0": 1795659035803
   }
  ],
  "sent": {
@@ -141,7 +147,8 @@
   "ETHUSDT|high": 1795652135234,
   "WBTCUSDT|high": 1795652135234,
   "MUBUSDT|high": 1795652201223,
-  "NVDABUSDT|high": 1795656329197
+  "NVDABUSDT|high": 1795656329197,
+  "PEPEUSDT|high": 1795659035803
  },
  "stats": {
   "n": 177,
