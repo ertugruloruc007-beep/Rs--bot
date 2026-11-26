@@ -2,24 +2,6 @@
  "version": 2,
  "signals": [
   {
-   "sym": "ZECUSDT",
-   "d": 0,
-   "entry": 775.25,
-   "t0": 1795651833631
-  },
-  {
-   "sym": "NEARUSDT",
-   "d": 0,
-   "entry": 3.074,
-   "t0": 1795651833631
-  },
-  {
-   "sym": "DOGEUSDT",
-   "d": 0,
-   "entry": 0.05627,
-   "t0": 1795651833631
-  },
-  {
    "sym": "BTCUSDT",
    "d": 0,
    "entry": 60897.4,
