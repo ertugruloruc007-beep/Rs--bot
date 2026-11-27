@@ -24,6 +24,18 @@
    "d": 1,
    "entry": 0.10933,
    "t0": 1795776037736
+  },
+  {
+   "sym": "XRPUSDT",
+   "d": 1,
+   "entry": 0.9853,
+   "t0": 1795776347381
+  },
+  {
+   "sym": "SUIUSDT",
+   "d": 1,
+   "entry": 0.6927,
+   "t0": 1795776347381
   }
  ],
  "sent": {
@@ -33,10 +45,10 @@
   "ETHUSDT|high": 1795755660002,
   "SOLUSDT|high": 1795771530953,
   "HYPEUSDT|high": 1795762529000,
-  "XRPUSDT|high": 1795772441050,
+  "XRPUSDT|high": 1795776347381,
   "WBTCUSDT|high": 1795757450781,
   "UNIUSDT|high": 1795767639100,
-  "SUIUSDT|high": 1795772441050,
+  "SUIUSDT|high": 1795776347381,
   "INITUSDT|low": 1795776037736
  },
  "stats": {
