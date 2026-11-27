@@ -1,6 +1,13 @@
 {
  "version": 2,
- "signals": [],
+ "signals": [
+  {
+   "sym": "DOGEUSDT",
+   "d": 1,
+   "entry": 0.05896,
+   "t0": 1795788065315
+  }
+ ],
  "sent": {
   "SOLUSDT|high": 1795771530953,
   "XRPUSDT|high": 1795776347381,
@@ -8,7 +15,7 @@
   "SUIUSDT|high": 1795776347381,
   "INITUSDT|low": 1795779638085,
   "PEPEUSDT|high": 1795778137094,
-  "DOGEUSDT|high": 1795779934641
+  "DOGEUSDT|high": 1795788065315
  },
  "stats": {
   "n": 253,
