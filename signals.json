@@ -36,6 +36,36 @@
    "d": 1,
    "entry": 63.78,
    "t0": 1795745443144
+  },
+  {
+   "sym": "ZECUSDT",
+   "d": 1,
+   "entry": 742.57,
+   "t0": 1795746327037
+  },
+  {
+   "sym": "XRPUSDT",
+   "d": 1,
+   "entry": 0.9597,
+   "t0": 1795746327037
+  },
+  {
+   "sym": "WBTCUSDT",
+   "d": 1,
+   "entry": 61508.4,
+   "t0": 1795746327037
+  },
+  {
+   "sym": "UNIUSDT",
+   "d": 1,
+   "entry": 4.871,
+   "t0": 1795746327037
+  },
+  {
+   "sym": "SUIUSDT",
+   "d": 1,
+   "entry": 0.6809,
+   "t0": 1795746327037
   }
  ],
  "sent": {
@@ -47,7 +77,12 @@
   "BTCUSDT|high": 1795745443144,
   "ETHUSDT|high": 1795745443144,
   "SOLUSDT|high": 1795745443144,
-  "HYPEUSDT|high": 1795745443144
+  "HYPEUSDT|high": 1795745443144,
+  "ZECUSDT|high": 1795746327037,
+  "XRPUSDT|high": 1795746327037,
+  "WBTCUSDT|high": 1795746327037,
+  "UNIUSDT|high": 1795746327037,
+  "SUIUSDT|high": 1795746327037
  },
  "stats": {
   "n": 205,
