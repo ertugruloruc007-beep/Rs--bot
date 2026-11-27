@@ -2,12 +2,6 @@
  "version": 2,
  "signals": [
   {
-   "sym": "TRXUSDT",
-   "d": 0,
-   "entry": 0.3028,
-   "t0": 1795791663304
-  },
-  {
    "sym": "PORTALUSDT",
    "d": 0,
    "entry": 0.02529,
