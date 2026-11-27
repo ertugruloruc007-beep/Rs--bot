@@ -12,10 +12,16 @@
    "d": -1,
    "entry": 1656.49,
    "t0": 1795817737371
+  },
+  {
+   "sym": "PORTALUSDT",
+   "d": -1,
+   "entry": 0.04133,
+   "t0": 1795823091443
   }
  ],
  "sent": {
-  "PORTALUSDT|high": 1795817438396,
+  "PORTALUSDT|high": 1795823091443,
   "ETHUSDT|low": 1795817737371,
   "TRXUSDT|low": 1795809656812
  },
