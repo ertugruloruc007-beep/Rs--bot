@@ -2,12 +2,6 @@
  "version": 2,
  "signals": [
   {
-   "sym": "SOLUSDT",
-   "d": 1,
-   "entry": 73.68,
-   "t0": 1795771530953
-  },
-  {
    "sym": "XRPUSDT",
    "d": 1,
    "entry": 0.9807,
@@ -46,19 +40,17 @@
  ],
  "sent": {
   "MMTUSDT|low": 1795761052383,
-  "BTCUSDT|high": 1795757450781,
   "SOLUSDT|high": 1795771530953,
   "HYPEUSDT|high": 1795762529000,
   "XRPUSDT|high": 1795776347381,
-  "WBTCUSDT|high": 1795757450781,
   "UNIUSDT|high": 1795767639100,
   "SUIUSDT|high": 1795776347381,
   "INITUSDT|low": 1795776037736,
   "PEPEUSDT|high": 1795778137094
  },
  "stats": {
-  "n": 244,
+  "n": 245,
   "win": 114,
-  "sum": -43.434104969981696
+  "sum": -44.0041375432716
  }
 }
