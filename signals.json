@@ -66,6 +66,12 @@
    "d": 1,
    "entry": 72.85,
    "t0": 1795753846708
+  },
+  {
+   "sym": "ETHUSDT",
+   "d": 1,
+   "entry": 1735.2,
+   "t0": 1795755660002
   }
  ],
  "sent": {
@@ -74,7 +80,7 @@
   "PEPEUSDT|low": 1795734938649,
   "MMTUSDT|low": 1795742438876,
   "BTCUSDT|high": 1795749337962,
-  "ETHUSDT|high": 1795749337962,
+  "ETHUSDT|high": 1795755660002,
   "SOLUSDT|high": 1795753846708,
   "HYPEUSDT|high": 1795745443144,
   "ZECUSDT|high": 1795749930433,
