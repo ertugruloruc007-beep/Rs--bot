@@ -6,14 +6,48 @@
    "d": 1,
    "entry": 0.1894,
    "t0": 1795742438876
+  },
+  {
+   "sym": "BTCUSDT",
+   "d": 1,
+   "entry": 61246.87,
+   "t0": 1795745443144
+  },
+  {
+   "sym": "ETHUSDT",
+   "d": 1,
+   "entry": 1716.5,
+   "t0": 1795745443144
+  },
+  {
+   "sym": "SOLUSDT",
+   "d": 1,
+   "entry": 72.2,
+   "t0": 1795745443144
+  },
+  {
+   "sym": "BNBUSDT",
+   "d": 1,
+   "entry": 559.96,
+   "t0": 1795745443144
+  },
+  {
+   "sym": "HYPEUSDT",
+   "d": 1,
+   "entry": 63.78,
+   "t0": 1795745443144
   }
  ],
  "sent": {
   "SOXLBUSDT|high": 1795728047308,
-  "BNBUSDT|high": 1795729834780,
+  "BNBUSDT|high": 1795745443144,
   "ZECUSDT|low": 1795734640572,
   "PEPEUSDT|low": 1795734938649,
-  "MMTUSDT|low": 1795742438876
+  "MMTUSDT|low": 1795742438876,
+  "BTCUSDT|high": 1795745443144,
+  "ETHUSDT|high": 1795745443144,
+  "SOLUSDT|high": 1795745443144,
+  "HYPEUSDT|high": 1795745443144
  },
  "stats": {
   "n": 205,
