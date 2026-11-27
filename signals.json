@@ -120,6 +120,12 @@
    "d": 0,
    "entry": 0.3028,
    "t0": 1795791663304
+  },
+  {
+   "sym": "PORTALUSDT",
+   "d": 0,
+   "entry": 0.02529,
+   "t0": 1795793740781
   }
  ],
  "sent": {
@@ -128,7 +134,7 @@
   "INITUSDT|low": 1795790437414,
   "PEPEUSDT|high": 1795778137094,
   "DOGEUSDT|high": 1795788065315,
-  "PORTALUSDT|high": 1795788637396,
+  "PORTALUSDT|high": 1795793740781,
   "XRPUSDT|low": 1795789851159,
   "NEARUSDT|low": 1795789851159,
   "SOXLBUSDT|low": 1795789851159,
