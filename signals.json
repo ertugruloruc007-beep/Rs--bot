@@ -12,6 +12,30 @@
    "d": 1,
    "entry": 0.0263,
    "t0": 1795788637396
+  },
+  {
+   "sym": "XRPUSDT",
+   "d": 1,
+   "entry": 0.9615,
+   "t0": 1795789851159
+  },
+  {
+   "sym": "NEARUSDT",
+   "d": 1,
+   "entry": 3.05,
+   "t0": 1795789851159
+  },
+  {
+   "sym": "SOXLBUSDT",
+   "d": 1,
+   "entry": 34.47,
+   "t0": 1795789851159
+  },
+  {
+   "sym": "NVDABUSDT",
+   "d": 1,
+   "entry": 150.22,
+   "t0": 1795789851159
   }
  ],
  "sent": {
@@ -21,7 +45,11 @@
   "INITUSDT|low": 1795779638085,
   "PEPEUSDT|high": 1795778137094,
   "DOGEUSDT|high": 1795788065315,
-  "PORTALUSDT|high": 1795788637396
+  "PORTALUSDT|high": 1795788637396,
+  "XRPUSDT|low": 1795789851159,
+  "NEARUSDT|low": 1795789851159,
+  "SOXLBUSDT|low": 1795789851159,
+  "NVDABUSDT|low": 1795789851159
  },
  "stats": {
   "n": 253,
