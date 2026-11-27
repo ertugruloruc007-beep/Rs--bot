@@ -2,12 +2,6 @@
  "version": 2,
  "signals": [
   {
-   "sym": "INITUSDT",
-   "d": 0,
-   "entry": 0.1039,
-   "t0": 1795794041242
-  },
-  {
    "sym": "ETHUSDT",
    "d": 0,
    "entry": 1672.2,
