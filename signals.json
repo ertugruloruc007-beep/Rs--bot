@@ -18,6 +18,12 @@
    "d": 1,
    "entry": 4.926,
    "t0": 1795767639100
+  },
+  {
+   "sym": "SOLUSDT",
+   "d": 1,
+   "entry": 73.68,
+   "t0": 1795771530953
   }
  ],
  "sent": {
@@ -25,9 +31,8 @@
   "MMTUSDT|low": 1795761052383,
   "BTCUSDT|high": 1795757450781,
   "ETHUSDT|high": 1795755660002,
-  "SOLUSDT|high": 1795767639100,
+  "SOLUSDT|high": 1795771530953,
   "HYPEUSDT|high": 1795762529000,
-  "ZECUSDT|high": 1795749930433,
   "XRPUSDT|high": 1795758335787,
   "WBTCUSDT|high": 1795757450781,
   "UNIUSDT|high": 1795767639100,
