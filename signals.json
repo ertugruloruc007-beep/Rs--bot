@@ -3,12 +3,6 @@
  "signals": [
   {
    "sym": "PORTALUSDT",
-   "d": 0,
-   "entry": 0.04003,
-   "t0": 1795812471163
-  },
-  {
-   "sym": "PORTALUSDT",
    "d": -1,
    "entry": 0.04031,
    "t0": 1795817438396
