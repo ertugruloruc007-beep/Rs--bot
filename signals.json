@@ -36,6 +36,12 @@
    "d": 1,
    "entry": 0.6927,
    "t0": 1795776347381
+  },
+  {
+   "sym": "PEPEUSDT",
+   "d": 1,
+   "entry": 3.66e-06,
+   "t0": 1795778137094
   }
  ],
  "sent": {
@@ -48,7 +54,8 @@
   "WBTCUSDT|high": 1795757450781,
   "UNIUSDT|high": 1795767639100,
   "SUIUSDT|high": 1795776347381,
-  "INITUSDT|low": 1795776037736
+  "INITUSDT|low": 1795776037736,
+  "PEPEUSDT|high": 1795778137094
  },
  "stats": {
   "n": 244,
