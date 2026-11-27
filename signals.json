@@ -72,6 +72,18 @@
    "d": 1,
    "entry": 1735.2,
    "t0": 1795755660002
+  },
+  {
+   "sym": "UNIUSDT",
+   "d": 1,
+   "entry": 4.873,
+   "t0": 1795756236163
+  },
+  {
+   "sym": "SUIUSDT",
+   "d": 1,
+   "entry": 0.6874,
+   "t0": 1795756236163
   }
  ],
  "sent": {
@@ -86,8 +98,8 @@
   "ZECUSDT|high": 1795749930433,
   "XRPUSDT|high": 1795749930433,
   "WBTCUSDT|high": 1795749930433,
-  "UNIUSDT|high": 1795752056490,
-  "SUIUSDT|high": 1795749930433,
+  "UNIUSDT|high": 1795756236163,
+  "SUIUSDT|high": 1795756236163,
   "NEARUSDT|high": 1795746647554,
   "PEPEUSDT|high": 1795746647554
  },
