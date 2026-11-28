@@ -2,12 +2,6 @@
  "version": 2,
  "signals": [
   {
-   "sym": "DOGEUSDT",
-   "d": -1,
-   "entry": 0.05697,
-   "t0": 1795843850647
-  },
-  {
    "sym": "HYPEUSDT",
    "d": -1,
    "entry": 63.03,
@@ -22,8 +16,6 @@
  ],
  "sent": {
   "PORTALUSDT|high": 1795831259840,
-  "ZECUSDT|high": 1795829730010,
-  "UNIUSDT|high": 1795829730010,
   "PORTALUSDT|low": 1795834126097,
   "UNIUSDT|low": 1795841731817,
   "WLFIUSDT|low": 1795840534869,
@@ -33,8 +25,8 @@
   "ETHUSDT|low": 1795849836513
  },
  "stats": {
-  "n": 283,
-  "win": 130,
-  "sum": 103.9717074364518
+  "n": 284,
+  "win": 131,
+  "sum": 104.12968531954816
  }
 }
