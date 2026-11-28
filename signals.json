@@ -2,12 +2,6 @@
  "version": 2,
  "signals": [
   {
-   "sym": "XRPUSDT",
-   "d": -1,
-   "entry": 0.9393,
-   "t0": 1795855541762
-  },
-  {
    "sym": "PORTALUSDT",
    "d": -1,
    "entry": 0.01545,
@@ -24,21 +18,48 @@
    "d": -1,
    "entry": 62.42,
    "t0": 1795862438494
+  },
+  {
+   "sym": "SOLUSDT",
+   "d": -1,
+   "entry": 70.63,
+   "t0": 1795863037761
+  },
+  {
+   "sym": "ZECUSDT",
+   "d": -1,
+   "entry": 722.08,
+   "t0": 1795863037761
+  },
+  {
+   "sym": "NEARUSDT",
+   "d": -1,
+   "entry": 2.98,
+   "t0": 1795863037761
+  },
+  {
+   "sym": "DOGEUSDT",
+   "d": -1,
+   "entry": 0.05649,
+   "t0": 1795863037761
   }
  ],
  "sent": {
   "UNIUSDT|low": 1795841731817,
   "TRXUSDT|low": 1795842935252,
-  "DOGEUSDT|low": 1795843850647,
+  "DOGEUSDT|low": 1795863037761,
   "HYPEUSDT|low": 1795862438494,
   "ETHUSDT|low": 1795849836513,
   "XRPUSDT|low": 1795855541762,
   "PORTALUSDT|low": 1795861237615,
-  "BTCUSDT|low": 1795861528625
+  "BTCUSDT|low": 1795861528625,
+  "SOLUSDT|low": 1795863037761,
+  "ZECUSDT|low": 1795863037761,
+  "NEARUSDT|low": 1795863037761
  },
  "stats": {
-  "n": 286,
+  "n": 287,
   "win": 131,
-  "sum": 102.3738189352015
+  "sum": 102.34188025746276
  }
 }
