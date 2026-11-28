@@ -54,6 +54,12 @@
    "d": -1,
    "entry": 0.937,
    "t0": 1795863931443
+  },
+  {
+   "sym": "PORTALUSDT",
+   "d": -1,
+   "entry": 0.01565,
+   "t0": 1795865449050
   }
  ],
  "sent": {
@@ -61,7 +67,7 @@
   "HYPEUSDT|low": 1795862438494,
   "ETHUSDT|low": 1795863931443,
   "XRPUSDT|low": 1795863931443,
-  "PORTALUSDT|low": 1795861237615,
+  "PORTALUSDT|low": 1795865449050,
   "BTCUSDT|low": 1795861528625,
   "SOLUSDT|low": 1795863037761,
   "ZECUSDT|low": 1795863037761,
