@@ -42,14 +42,26 @@
    "d": -1,
    "entry": 0.05649,
    "t0": 1795863037761
+  },
+  {
+   "sym": "ETHUSDT",
+   "d": -1,
+   "entry": 1643.22,
+   "t0": 1795863931443
+  },
+  {
+   "sym": "XRPUSDT",
+   "d": -1,
+   "entry": 0.937,
+   "t0": 1795863931443
   }
  ],
  "sent": {
   "TRXUSDT|low": 1795842935252,
   "DOGEUSDT|low": 1795863037761,
   "HYPEUSDT|low": 1795862438494,
-  "ETHUSDT|low": 1795849836513,
-  "XRPUSDT|low": 1795855541762,
+  "ETHUSDT|low": 1795863931443,
+  "XRPUSDT|low": 1795863931443,
   "PORTALUSDT|low": 1795861237615,
   "BTCUSDT|low": 1795861528625,
   "SOLUSDT|low": 1795863037761,
