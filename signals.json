@@ -18,14 +18,19 @@
    "d": -1,
    "entry": 59368.75,
    "t0": 1795861528625
+  },
+  {
+   "sym": "HYPEUSDT",
+   "d": -1,
+   "entry": 62.42,
+   "t0": 1795862438494
   }
  ],
  "sent": {
   "UNIUSDT|low": 1795841731817,
-  "WLFIUSDT|low": 1795840534869,
   "TRXUSDT|low": 1795842935252,
   "DOGEUSDT|low": 1795843850647,
-  "HYPEUSDT|low": 1795845037438,
+  "HYPEUSDT|low": 1795862438494,
   "ETHUSDT|low": 1795849836513,
   "XRPUSDT|low": 1795855541762,
   "PORTALUSDT|low": 1795861237615,
